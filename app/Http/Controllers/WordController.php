@@ -9,6 +9,15 @@ use App\Models\Word;
 
 class WordController extends Controller
 {
+    public function index()
+    {
+        $words = Word::with('tags')->get();
+
+        return Inertia::render('Homepage', [
+            'words' => $words
+        ]);
+    }
+    
     public function show($id)
     {
         $word = Word::with('tags')->findOrFail($id);
