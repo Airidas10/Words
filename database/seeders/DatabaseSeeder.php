@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+
+use App\Models\Tag;
+use App\Models\Word;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +14,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $tags = Tag::factory(10)->create();
+        $words = Word::factory(30)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        foreach($words as $word){
+            $tagsToGet = random_int(0, 3);
+            $wordTags = $tags->take($tagsToGet);
+            $word->tags()->sync($wordTags->pluck('id'));
+        }
     }
 }
