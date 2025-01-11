@@ -15,12 +15,27 @@
         <div v-else class="mt-6">
             <p>No tags available.</p>
         </div>
+
+        <div class="mt-6">
+            <InertiaLink href="/" class="text-blue-600 hover:text-blue-800 font-medium">
+                &larr; Back to Words
+            </InertiaLink>
+        </div>
     </div>
 </template>
 
+<script>
+    export default{
+        name: 'word-page'
+    }
+</script>
+
 <script setup>
-    defineProps({
-      word: Object
+    import { Link as InertiaLink } from '@inertiajs/vue3'
+
+    // Props
+    const props = defineProps({
+        word: Object
     })
 </script>
 

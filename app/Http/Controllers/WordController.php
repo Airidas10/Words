@@ -13,11 +13,11 @@ class WordController extends Controller
     {
         $words = Word::with('tags')->get();
 
-        return Inertia::render('Homepage', [
+        return Inertia::render('Index', [
             'words' => $words
         ]);
     }
-    
+
     public function show($id)
     {
         $word = Word::with('tags')->findOrFail($id);
