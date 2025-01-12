@@ -31,6 +31,7 @@
 </script>
 
 <script setup>
+    // Libraries
     import { Link as InertiaLink } from '@inertiajs/vue3'
 
     // Props
