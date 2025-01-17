@@ -9,7 +9,7 @@
         </InertiaLink>
 
         <h2 class="text-xl font-semibold text-gray-800">{{ word.word }}</h2>
-        <p class="text-gray-600">{{ word.translation }}</p>
+        <p class="text-gray-600">{{ showTranslation ? word.translation : '*****' }}</p>
         <div class="mt-4 flex flex-wrap gap-2">
             <span  v-for="tag in word.tags"  @click.prevent.stop="handleTagClick(tag)" class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
                 {{ tag.tag }}
@@ -31,6 +31,7 @@
 
     const props = defineProps({
         word: {type: Object},
+        showTranslation: {type: Boolean, default: true},
     })
 
     const emits = defineEmits(['tagClick'])
