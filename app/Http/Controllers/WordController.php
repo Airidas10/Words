@@ -7,13 +7,13 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Word;
 
-use App\Http\Requests\MeetingRequest;
+use App\Http\Requests\WordRequest;
 
 class WordController extends Controller
 {
     public function index()
     {
-        $words = Word::with('tags')->get();
+        $words = Word::with('tags')->orderBy('created_at', 'desc')->get();
 
         return Inertia::render('Index', [
             'words' => $words
@@ -31,15 +31,20 @@ class WordController extends Controller
 
     public function create()
     {
-        \Log::debug("HERE");
         return Inertia::render('WordCreator', [
             'word' => null
         ]);
     }
 
-    public function store(MeetingRequest $request)
+    public function store(WordRequest $request)
     {
-        // TODO
+        $response = ['status' => 'error', 'msg' => 'Something went wrong!', 'data' => null];
+
+        $word = Word::create($request->all());
+
+        $response = ['status' => 'success', 'msg' => 'Word was created!', 'data' => $word];
+
+        return $response;
     }
 
     public function edit($id)
@@ -51,13 +56,33 @@ class WordController extends Controller
         ]);
     }
 
-    public function update(MeetingRequest $request)
+    public function update(WordRequest $request, $id)
     {
-        // TODO
+        $response = ['status' => 'error', 'msg' => 'Something went wrong!', 'data' => null];
+
+        $word = Word::findOrFail($id);
+
+        if($word){
+            $word->update($request->all());
+        }
+
+        $response = ['status' => 'success', 'msg' => 'Word was updated!', 'data' => $word];
+
+        return $response;
     }
 
-    public function destroy(MeetingRequest $request)
+    public function destroy(WordRequest $request, $id)
     {
-        // TODO
+        $response = ['status' => 'error', 'msg' => 'Something went wrong!', 'data' => null];
+
+        $word = Word::findOrFail($id);
+
+        if($word){
+            $word->delete();
+        }
+
+        $response = ['status' => 'success', 'msg' => 'Word was deleted!', 'data' => null];
+
+        return $response;
     }
 }

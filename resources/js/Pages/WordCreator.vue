@@ -35,6 +35,10 @@
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" @click.prevent.stop="saveButtonClicked">
                 Save
             </button>
+
+            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" @click.prevent.stop="deleteButtonClicked">
+                Delete
+            </button>
         </form>
 
         <div class="mt-6">
@@ -56,7 +60,7 @@
     // Vue stuff
     import { ref, reactive, computed, watch } from 'vue'
     // Libraries
-    import { Link as InertiaLink } from '@inertiajs/vue3'
+    import { Link as InertiaLink, router } from '@inertiajs/vue3'
     // Reusables
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
 
@@ -94,12 +98,32 @@
     }
 
     function saveButtonClicked(){
-        console.log("saveButtonClicked")
-        let endpoint = 'TODO'
-        let method = 'POST'
+        let endpoint = mode.value == 'create' ? '/api/words/create' : '/api/words/update/' + props.word.id
+        let method = mode.value == 'create' ? 'POST' : 'PUT'
+        let apiData = wordData
 
         axiosRequest(endpoint, apiData, method).then((response) => {
             console.log("response", response)
+            if(response.status == 'success'){
+                router.visit('/')
+            } else{
+                alert(response.msg)
+            }
+        })
+    }
+
+    function deleteButtonClicked(){
+        let endpoint = '/api/words/destroy/' + props.word.id
+        let method = 'DELETE'
+        let apiData = {}
+
+        axiosRequest(endpoint, apiData, method).then((response) => {
+            console.log("response", response)
+            if(response.status == 'success'){
+                router.visit('/')
+            } else{
+                alert(response.msg)
+            }
         })
     }
 </script>

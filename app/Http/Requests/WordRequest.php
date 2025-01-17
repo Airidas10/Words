@@ -11,7 +11,7 @@ class WordRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,11 +21,15 @@ class WordRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
-            'word' => 'required|string|max:191',
-            'translation' => 'required|string|max:191',
-            'description' => 'nullable|string|max:65535',
-        ];
+        $rules = [];
+
+        if(!in_array($this->method(), ['DELETE'])){
+            $rules = [
+                'word' => 'required|string|max:191',
+                'translation' => 'required|string|max:191',
+                'description' => 'nullable|string|max:65535',
+            ];
+        }
 
         return $rules;
     }
