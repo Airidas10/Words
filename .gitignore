@@ -53,4 +53,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+.DS_Store
 >>>>>>> afed93e (Initial Laravel and Vue setup with Inertia)
