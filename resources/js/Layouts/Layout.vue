@@ -16,7 +16,7 @@
                     </svg>
                 </button>
                 <nav :class="['lg:flex', isMenuOpen ? 'block' : 'hidden']" class="absolute lg:static top-12 left-0 bg-blue-800 w-full lg:w-auto lg:bg-transparent lg:space-x-4 space-y-2 lg:space-y-0">
-                    <InertiaLink v-for="(link, index) in links" :key="index" :href="link.href" class="block lg:inline-block text-sm text-blue-300 hover:text-white px-4 py-2 lg:p-0">
+                    <InertiaLink v-for="(link, index) in links" :key="index" :href="link.href" class="block lg:inline-block text-sm text-blue-300 hover:text-white px-4 py-2 lg:p-0" @click="linkClicked">
                         {{ link.label }}
                     </InertiaLink>
                 </nav>
@@ -65,6 +65,10 @@
 
 
     }, 500)
+
+    function linkClicked(){
+        isMenuOpen.value = false
+    }
 </script>
 
 <style scoped>
