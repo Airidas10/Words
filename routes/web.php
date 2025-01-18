@@ -9,3 +9,4 @@ Route::get('/words/create', [WordController::class, 'create'])->name('words.crea
 Route::get('/words/{word}', [WordController::class, 'show'])->name('words.show');
 Route::get('/words/edit/{id}', [WordController::class, 'edit'])->name('words.edit');
 
+Route::get('/random', [WordController::class, 'getRandomWord'])->name('words.random');
