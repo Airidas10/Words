@@ -1,6 +1,10 @@
 <template>
     <div class="word-page">
-        <h1 class="text-3xl font-semibold">{{ word.word }}</h1>
+
+        <div class="flex items-center">
+            <h1 class="text-3xl font-semibold inline">{{ word.word }}</h1>
+            <InertiaLink v-if="isRandomPage" href="/random" class="text-blue-500 text-sm ml-2 hover:underline">Regenerate</InertiaLink>
+        </div>
         <p class="text-gray-600 mt-4">{{ word.translation }}</p>
 
         <div v-if="word.tags.length" class="mt-6">
@@ -31,12 +35,20 @@
 </script>
 
 <script setup>
+    // Vue stuff
+    import { computed } from 'vue' 
     // Libraries
-    import { Link as InertiaLink } from '@inertiajs/vue3'
+    import { Link as InertiaLink, usePage } from '@inertiajs/vue3'
+
+    const { url } = usePage()
 
     // Props
     const props = defineProps({
         word: Object
+    })
+
+    const isRandomPage = computed(() => {
+        return (url === '/random') ? true : false
     })
 </script>
 

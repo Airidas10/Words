@@ -85,4 +85,17 @@ class WordController extends Controller
 
         return $response;
     }
+
+    public function getRandomWord(Request $request)
+    {
+        $word = Word::with('tags')->inRandomOrder()->first();
+
+        if($request->ajax() && $request->header('Accept') === 'application/json'){
+            return ['status' => 'success', 'msg' => 'Data fetched successfully', 'data' => $word];
+        } else{
+            return Inertia::render('Word', [
+                'word' => $word
+            ]);
+        }  
+    }
 }
