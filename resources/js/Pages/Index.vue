@@ -7,10 +7,6 @@
                     <p class="text-gray-600">CHANGEME DESCRIPTION</p>
                 </header>
 
-                <form class="mb-6">
-                    <input v-model="searchString" type="text" name="search" placeholder="Search..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200" @input="handleSearch">
-                </form>
-
                 <div class="flex justify-between items-center mb-6">
                     <InertiaLink href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Create New
@@ -44,7 +40,6 @@
     import { ref } from 'vue'
     // Libraries
     import { Link as InertiaLink } from '@inertiajs/vue3'
-    import { debounce } from 'lodash'
     // Reusables
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
     // Components
@@ -56,14 +51,6 @@
     const props = defineProps({
         words : {type: Array},
     })
-
-    const searchString = ref('')
-
-    const handleSearch = debounce(() => {
-        console.log("handleSearch", searchString.value)
-
-
-    }, 500)
 
     function handleTagClick(data){
         let tag = data.tag
