@@ -37,20 +37,29 @@
 
 <script setup>
     // Vue stuff
-    import { ref } from 'vue'
+    import { ref, computed, watch } from 'vue'
     // Libraries
     import { Link as InertiaLink } from '@inertiajs/vue3'
+    import { useStore } from 'vuex'
     // Reusables
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
     // Components
     import WordCard from '../Components/WordCard.vue'
 
     const { axiosRequest } = useAxiosRequest()
+    const store = useStore()
 
     // Props
     const props = defineProps({
-        words : {type: Array},
+        wordsList : {type: Array},
     })
+
+    const words = ref([])
+
+    watch(() => props.wordsList, (newValue, oldValue) => {
+            words.value = props.wordsList
+        }, {deep: true, immediate: true}
+    )
 
     function handleTagClick(data){
         let tag = data.tag
@@ -59,13 +68,27 @@
         // Trigger search with tag
     }
 
-    function search(data){
-        let endpoint = 'TODO'
+    const searchString = computed(() => {
+        return store.state.searchString
+    })
 
-        let method = 'POST'
+    watch(searchString, (newValue, oldValue) => {
+        let searchType = 'global'
+        search(searchType, newValue)
+    })
+
+    function search(type, string){
+        let method = 'GET'
+        let endpoint = '/api/search/' + type + '/' + string
+        let apiData = null
 
         axiosRequest(endpoint, apiData, method).then((response) => {
             console.log("response", response)
+            if(response.status == 'success'){
+                words.value = response.data
+            } else{
+                alert("Error. Something went wrong!")
+            }
         })
     }
 

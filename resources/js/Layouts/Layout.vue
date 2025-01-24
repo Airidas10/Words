@@ -45,6 +45,9 @@
     // Libraries
     import { Link as InertiaLink } from '@inertiajs/vue3'
     import { debounce } from 'lodash'
+    import { useStore } from 'vuex'
+
+    const store = useStore()
 
     const props = defineProps({
         // pass shared props if needed
@@ -61,9 +64,7 @@
     const searchString = ref('')
 
     const handleSearch = debounce(() => {
-        console.log("handleSearch", searchString.value)
-
-
+        store.commit('setSearchString', searchString.value)
     }, 500)
 
     function linkClicked(){
