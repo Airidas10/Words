@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
 
         foreach($words as $word){
             $tagsToGet = random_int(0, 3);
-            $wordTags = $tags->take($tagsToGet);
+            $wordTags = $tags->random($tagsToGet);
             $word->tags()->sync($wordTags->pluck('id'));
         }
     }
