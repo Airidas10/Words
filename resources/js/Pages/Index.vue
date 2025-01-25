@@ -8,13 +8,13 @@
                 </header>
 
                 <div class="flex justify-between items-center mb-6">
+                    <button @click="toggleTranslation" class="text-gray-600 hover:text-gray-800">
+                        {{ showTranslation ? 'Hide Translation' : 'Show Translation' }}
+                    </button>
+
                     <InertiaLink href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Create New
                     </InertiaLink>
-
-                    <button @click="toggleTranslation" class="text-gray-600 hover:text-gray-800">
-                        {{ showTranslation ? 'Hide' : 'Show' }}
-                    </button>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
