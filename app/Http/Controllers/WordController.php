@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use Inertia\Inertia;
 use App\Models\Word;
+use App\Models\Tag;
 
 use App\Http\Requests\WordRequest;
 
@@ -31,8 +33,11 @@ class WordController extends Controller
 
     public function create()
     {
+        $tags = Tag::all();
+
         return Inertia::render('WordCreator', [
-            'word' => null
+            'word' => null, 
+            'tags' => $tags,
         ]);
     }
 
@@ -40,9 +45,21 @@ class WordController extends Controller
     {
         $response = ['status' => 'error', 'msg' => 'Something went wrong!', 'data' => null];
 
-        $word = Word::create($request->all());
+        if(Word::where('word', $request->word)->exists()){
+            return ['status' => 'error', 'msg' => 'This word (' . $request->word . ') already exists!', 'data' => null];
+        }
 
-        $response = ['status' => 'success', 'msg' => 'Word was created!', 'data' => $word];
+        DB::transaction(function() use ($request, &$response){
+            $word = Word::create($request->all());
+
+            if($word){
+                if($request->has('tags')){
+                    $tagIds = collect($request->tags)->pluck('id');
+                    $word->tags()->sync($tagIds);
+                    $response = ['status' => 'success', 'msg' => 'Word was updated!', 'data' => $word];
+                }
+            }
+        }, 5);
 
         return $response;
     }
@@ -50,23 +67,34 @@ class WordController extends Controller
     public function edit($id)
     {
         $word = Word::with('tags')->findOrFail($id);
+        $tags = Tag::all();
 
         return Inertia::render('WordCreator', [
-            'word' => $word
+            'word' => $word,
+            'tags' => $tags,
         ]);
     }
 
     public function update(WordRequest $request, $id)
-    {
+    {        
         $response = ['status' => 'error', 'msg' => 'Something went wrong!', 'data' => null];
 
-        $word = Word::findOrFail($id);
-
-        if($word){
-            $word->update($request->all());
+        if(Word::where('word', $request->word)->whereNot('id', $request->id)->exists()){
+            return ['status' => 'error', 'msg' => 'This word (' . $request->word . ') already exists!', 'data' => null];
         }
 
-        $response = ['status' => 'success', 'msg' => 'Word was updated!', 'data' => $word];
+        DB::transaction(function() use ($request, $id, &$response){
+            $word = Word::findOrFail($id);
+
+            if($word){
+                $word->update($request->all());
+                if($request->has('tags')){
+                    $tagIds = collect($request->tags)->pluck('id');
+                    $word->tags()->sync($tagIds);
+                    $response = ['status' => 'success', 'msg' => 'Word was updated!', 'data' => $word];
+                }
+            }
+        }, 5);
 
         return $response;
     }

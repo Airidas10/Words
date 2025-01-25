@@ -28,6 +28,8 @@ class WordRequest extends FormRequest
                 'word' => 'required|string|max:191',
                 'translation' => 'required|string|max:191',
                 'description' => 'nullable|string|max:65535',
+                'tags' => 'present|array',
+                'tags.*.id' => 'required|exists:tags,id',
             ];
         }
 
