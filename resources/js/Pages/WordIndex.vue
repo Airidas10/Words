@@ -15,7 +15,7 @@
                 </div>
 
                 <div class="flex justify-between items-center mb-6">
-                    <button v-if="words?.length > 0" @click="toggleTranslation" class="text-gray-600 hover:text-gray-800">
+                    <button v-if="words?.length > 0" @click="toggleTranslation" class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm">
                         {{ showTranslation ? 'Hide Translation' : 'Show Translation' }}
                     </button>
 
@@ -27,7 +27,7 @@
                 <div v-if="words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <div v-for="word in words">
                         <InertiaLink :href="`/words/${word.id}`">
-                            <word-card :word="word" :show-translation="showTranslation" @tagClick="handleTagClick"></word-card>
+                            <word-card :word="word" @tagClick="handleTagClick"></word-card>
                         </InertiaLink>
                     </div>
                 </div>
@@ -80,9 +80,8 @@
         search(searchType, tagObj.tag)
     }
 
-    const searchString = computed(() => {
-        return store.state.searchString
-    })
+
+    const searchString = computed(() => store.state.searchString)
 
     const searchHeadline = computed(() => {
         let headline = 'Search results:'
@@ -106,9 +105,9 @@
         router.visit('/search/' + type + '/' + string)
     }
 
-    const showTranslation = ref(true)
+    const showTranslation = computed(() => store.state.showTranslation)
 
     function toggleTranslation(){
-        showTranslation.value = !showTranslation.value
+        store.commit('setShowTranslation', !showTranslation.value)
     }
 </script>

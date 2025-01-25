@@ -26,16 +26,22 @@
 </script>
 
 <script setup>
+    // Vue stuff
+    import { computed } from 'vue' 
     // Libraries
     import { Link as InertiaLink } from '@inertiajs/vue3'
+    import { useStore } from 'vuex'
+
+    const store = useStore()
 
     const props = defineProps({
         word: {type: Object},
-        showTranslation: {type: Boolean, default: true},
     })
 
     const emits = defineEmits(['tagClick'])
-    
+
+    const showTranslation = computed(() => store.state.showTranslation)
+
     function handleTagClick(tag){
         let data = {tag: tag}
         emits('tagClick', data)

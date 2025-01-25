@@ -5,7 +5,13 @@
             <h1 class="text-3xl font-semibold inline">{{ word.word }}</h1>
             <InertiaLink v-if="isRandomPage" href="/random" class="text-blue-500 text-sm ml-2 hover:underline">Regenerate</InertiaLink>
         </div>
-        <p class="text-gray-600 mt-4">{{ word.translation }}</p>
+        
+        <p class="text-gray-600 mt-4 flex items-center">
+            <span>{{ showTranslation ? word.translation : '*****' }}</span>
+            <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm" @click="toggleTranslationVisibility">
+                {{ showTranslation ? 'Hide' : 'Show' }} Translation
+            </span>
+        </p>
 
         <div v-if="word.tags.length" class="mt-6">
             <h3 class="text-lg font-medium">Tags:</h3>
@@ -39,7 +45,9 @@
     import { computed } from 'vue' 
     // Libraries
     import { Link as InertiaLink, usePage } from '@inertiajs/vue3'
+    import { useStore } from 'vuex'
 
+    const store = useStore()
     const { url } = usePage()
 
     // Props
@@ -50,6 +58,13 @@
     const isRandomPage = computed(() => {
         return (url === '/random') ? true : false
     })
+
+    const showTranslation = computed(() => store.state.showTranslation)
+
+    function toggleTranslationVisibility(){
+        store.commit('setShowTranslation', !showTranslation.value)
+    }
+
 </script>
 
 <style scoped>
