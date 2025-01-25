@@ -7,22 +7,33 @@
                     <p class="text-gray-600">CHANGEME DESCRIPTION</p>
                 </header>
 
+                <div v-if="isSearching" class="mt-8 text-center">
+                    <h3 v-html="searchHeadline"></h3>
+                    <InertiaLink href="/" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        &larr; Back to Words
+                    </InertiaLink>
+                </div>
+
                 <div class="flex justify-between items-center mb-6">
-                    <button @click="toggleTranslation" class="text-gray-600 hover:text-gray-800">
+                    <button v-if="words?.length > 0" @click="toggleTranslation" class="text-gray-600 hover:text-gray-800">
                         {{ showTranslation ? 'Hide Translation' : 'Show Translation' }}
                     </button>
 
-                    <InertiaLink href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <InertiaLink v-if="!isSearching" href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Create New
                     </InertiaLink>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div v-if="words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <div v-for="word in words">
                         <InertiaLink :href="`/words/${word.id}`">
                             <word-card :word="word" :show-translation="showTranslation" @tagClick="handleTagClick"></word-card>
                         </InertiaLink>
                     </div>
+                </div>
+
+                <div v-if="words?.length == 0" class="text-center">
+                    Nothing to show here
                 </div>
             </div>
         </div>
@@ -39,7 +50,7 @@
     // Vue stuff
     import { ref, computed, watch } from 'vue'
     // Libraries
-    import { Link as InertiaLink } from '@inertiajs/vue3'
+    import { Link as InertiaLink, router } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
     // Reusables
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
@@ -51,7 +62,9 @@
 
     // Props
     const props = defineProps({
-        wordsList : {type: Array},
+        wordsList : {type: Array, default: []},
+        isSearching: {type: Boolean, default: false},
+        searchData: {type: Object, default: {}},
     })
 
     const words = ref([])
@@ -62,14 +75,26 @@
     )
 
     function handleTagClick(data){
-        let tag = data.tag
-        console.log("handleTagClick", tag)
-
-        // Trigger search with tag
+        let tagObj = data.tag
+        let searchType = 'tag'
+        search(searchType, tagObj.tag)
     }
 
     const searchString = computed(() => {
         return store.state.searchString
+    })
+
+    const searchHeadline = computed(() => {
+        let headline = 'Search results:'
+        if(props.searchData.hasOwnProperty('type')){
+            if(props.searchData.type == 'tag'){
+                headline = 'Search results for a <strong>tag</strong> named <strong>' + props.searchData.searchString + '</strong>'
+            } else if(props.searchData.type == 'global'){
+                headline = 'Search results for words containing <strong>' + props.searchData.searchString + '</strong>'
+            }
+        }
+
+        return headline
     })
 
     watch(searchString, (newValue, oldValue) => {
@@ -78,18 +103,7 @@
     })
 
     function search(type, string){
-        let method = 'GET'
-        let endpoint = '/api/search/' + type + '/' + string
-        let apiData = null
-
-        axiosRequest(endpoint, apiData, method).then((response) => {
-            console.log("response", response)
-            if(response.status == 'success'){
-                words.value = response.data
-            } else{
-                alert("Error. Something went wrong!")
-            }
-        })
+        router.visit('/search/' + type + '/' + string)
     }
 
     const showTranslation = ref(true)

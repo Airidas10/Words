@@ -17,8 +17,8 @@ class WordController extends Controller
     {
         $words = Word::with('tags')->orderBy('created_at', 'desc')->get();
 
-        return Inertia::render('Index', [
-            'wordsList' => $words
+        return Inertia::render('WordIndex', [
+            'wordsList' => $words,
         ]);
     }
 
