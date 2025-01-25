@@ -18,11 +18,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(tag, index) in tags" :key="index" class="hover:bg-gray-100 cursor-pointer" @click.prevent="handleRowClick(tag)">
+                <tr v-for="(tag, index) in tags" :key="index" class="hover:bg-gray-100 cursor-pointer" @click.prevent.stop="handleRowClick(tag)">
                     <td class="px-4 py-2">{{ tag.tag }}</td>
                     <td class="px-4 py-2">{{ tag.words_count }}</td>
                     <td class="px-4 py-2">
-                        <InertiaLink @click.prevent :href="`/tags/edit/${tag.id}`" class="absolute text-sm text-blue-600 hover:underline flex items-center">
+                        <InertiaLink @click.prevent.stop :href="`/tags/edit/${tag.id}`" class="absolute text-sm text-blue-600 hover:underline flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M17.414 2.586a2 2 0 00-2.828 0L6 11.172V14h2.828l8.586-8.586a2 2 0 000-2.828zM7 12v-1.414l8.586-8.586a1 1 0 011.414 1.414L8.414 12H7z"/>
                                 <path fill-rule="evenodd" d="M4 15a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" clip-rule="evenodd"/>

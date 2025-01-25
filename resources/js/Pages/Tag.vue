@@ -4,12 +4,13 @@
             <h1 class="text-3xl font-semibold text-gray-800">{{ tag.tag }}</h1>
         </div>
 
-        <div class="mt-6 w-full text-center">
+        <div class="mt-6 mb-6 w-full text-center">
             <InertiaLink href="/tags" class="text-blue-600 hover:text-blue-800 font-medium">
                 &larr; Back to Tags
             </InertiaLink>
         </div>
 
+        <h3 v-if="tag.words?.length > 0" class="text-xl font-semibold text-gray-800 mb-6">Related Words:</h3>
         <div v-if="tag.words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
             <div v-for="word in tag.words">
                 <InertiaLink :href="`/words/${word.id}`">
