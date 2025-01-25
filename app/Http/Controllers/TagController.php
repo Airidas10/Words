@@ -13,10 +13,19 @@ class TagController extends Controller
 {
     public function index()
     {
-        $tags = Tag::withCount('words')->orderBy('created_at', 'desc')->get();
+        $tags = Tag::withCount('words')->orderBy('created_at', 'asc')->get();
 
         return Inertia::render('TagsIndex', [
             'tags' => $tags
+        ]);
+    }
+
+    public function show($id)
+    {
+        $tag = Tag::with('words')->findOrFail($id);
+
+        return Inertia::render('Tag', [
+            'tag' => $tag,
         ]);
     }
 

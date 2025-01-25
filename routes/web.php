@@ -16,4 +16,5 @@ Route::get('/search/{type}/{searchString?}', [SearchController::class, 'search']
 
 Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
 Route::get('/tags/create', [TagController::class, 'create'])->name('tags.create');
+Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
 Route::get('/tags/edit/{id}', [TagController::class, 'edit'])->name('tags.edit');
