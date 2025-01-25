@@ -7,7 +7,7 @@
                 </InertiaLink>
 
                 <div class="relative lg:block">
-                    <input type="text" class="rounded bg-white text-gray-900 px-3 py-1 text-sm placeholder-gray-500 focus:outline-none focus:ring focus:ring-blue-500 w-full pr-12" placeholder="Search..." v-model="searchString"/>
+                    <input type="text" class="rounded bg-white text-gray-900 px-3 py-1 text-sm placeholder-gray-500 focus:outline-none focus:ring focus:ring-blue-500 w-full pr-12" placeholder="Search..." v-model="searchString" @keydown.enter.prevent="triggerSearch"/>
                     
                     <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-600 bg-transparent border-none cursor-pointer text-sm" @click.prevent="triggerSearch">
                         Go
@@ -45,9 +45,9 @@
 
 <script setup> 
     // Vue stuff
-    import { ref } from 'vue'
+    import { ref, computed, watch } from 'vue'
     // Libraries
-    import { Link as InertiaLink } from '@inertiajs/vue3'
+    import { Link as InertiaLink, router } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
 
     const store = useStore()
@@ -64,10 +64,22 @@
         { href: '/tags', label: 'Tags' },
     ])
 
+    const searchData = computed(() => store.state.searchData)
+    watch(searchData, (newValue, oldValue) => {
+            if(searchData.value?.type && searchData.value?.tag)
+            search(searchData.value.type, searchData.value.tag)
+        }, {deep: true, immediate: true}
+    )
+
     const searchString = ref('')
 
     function triggerSearch(){
-        store.commit('setSearchString', searchString.value)
+        let searchType = 'global'
+        search(searchType, searchString.value)
+    }
+
+    function search(type, string){
+        router.visit('/search/' + type + '/' + string)
     }
 
     function linkClicked(){

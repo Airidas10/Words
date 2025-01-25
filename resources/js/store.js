@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 
 export default createStore({
     state: {
-        searchString: null,
+        searchData: null,
         showTranslation: true,
     },
 
@@ -15,8 +15,8 @@ export default createStore({
     },
 
     mutations: {
-        setSearchString(state, searchString){
-            state.searchString = searchString
+        setSearchData(state, searchData){
+            state.searchData = searchData
         },
 
         setShowTranslation(state, showTranslation){

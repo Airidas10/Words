@@ -50,7 +50,7 @@
     // Vue stuff
     import { ref, computed, watch } from 'vue'
     // Libraries
-    import { Link as InertiaLink, router } from '@inertiajs/vue3'
+    import { Link as InertiaLink } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
     // Reusables
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
@@ -77,11 +77,10 @@
     function handleTagClick(data){
         let tagObj = data.tag
         let searchType = 'tag'
-        search(searchType, tagObj.tag)
+
+        let searchData = {type: searchType, tag: tagObj.tag}
+        store.commit('setSearchData', searchData)
     }
-
-
-    const searchString = computed(() => store.state.searchString)
 
     const searchHeadline = computed(() => {
         let headline = 'Search results:'
@@ -89,21 +88,16 @@
             if(props.searchData.type == 'tag'){
                 headline = 'Search results for a <strong>tag</strong> named <strong>' + props.searchData.searchString + '</strong>'
             } else if(props.searchData.type == 'global'){
-                headline = 'Search results for words containing <strong>' + props.searchData.searchString + '</strong>'
+                if(props.searchData.searchString){
+                    headline = 'Search results for words containing <strong>' + props.searchData.searchString + '</strong>'
+                } else{
+                    headline = 'Search results for <strong>everything</strong>'
+                }
             }
         }
 
         return headline
     })
-
-    watch(searchString, (newValue, oldValue) => {
-        let searchType = 'global'
-        search(searchType, newValue)
-    })
-
-    function search(type, string){
-        router.visit('/search/' + type + '/' + string)
-    }
 
     const showTranslation = computed(() => store.state.showTranslation)
 
