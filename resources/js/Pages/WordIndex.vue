@@ -66,6 +66,7 @@
     // Props
     const props = defineProps({
         wordsList : {type: Object, default: {}},
+        user: {type: Object, default: null},
         isSearching: {type: Boolean, default: false},
         searchData: {type: Object, default: {}},
     })
@@ -74,6 +75,13 @@
 
     watch(() => props.wordsList, (newValue, oldValue) => {
             words.value = props.wordsList.data
+        }, {deep: true, immediate: true}
+    )
+
+    watch(() => props.user, (newValue, oldValue) => {
+            if(newValue){
+                store.commit("setUser", newValue)
+            }
         }, {deep: true, immediate: true}
     )
 

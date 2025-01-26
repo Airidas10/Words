@@ -20,12 +20,11 @@ class WordController extends Controller
     {
         $wordsPerPage = config('words.words_per_page');
         $words = Word::with('tags')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
-
         $user = Auth::user();
-        Inertia::share('returnedUser', $user);
 
         return Inertia::render('WordIndex', [
             'wordsList' => $words,
+            'user' => $user,
         ]);
     }
 

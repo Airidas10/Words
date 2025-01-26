@@ -47,24 +47,10 @@
     // Vue stuff
     import { ref, computed, watch } from 'vue'
     // Libraries
-    import { Link as InertiaLink, router, usePage } from '@inertiajs/vue3'
+    import { Link as InertiaLink, router } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
 
     const store = useStore()
-
-    const page = usePage()
-
-    const returnedUser = computed(() => page.props.returnedUser)
-    watch(returnedUser, (newValue, oldValue) => {
-        console.log("returnedUser ", returnedUser.value)
-            if(newValue){
-                console.log("setUser", newValue)
-                store.commit("setUser", newValue)
-            } else{
-                console.log("ELSE")
-            }
-        }, {deep: true, immediate: true}
-    )
 
     const user = computed(() => store.state.user)
 
@@ -104,7 +90,6 @@
 
     const isMenuOpen = ref(false)
     function linkClicked(link, event){
-        console.log("user", user.value)
         isMenuOpen.value = false
     }
 </script>
