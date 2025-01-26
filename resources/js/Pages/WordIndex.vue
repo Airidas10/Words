@@ -32,6 +32,8 @@
                     </div>
                 </div>
 
+                <Pagination :pagination-data="wordsList.links" />
+
                 <div v-if="words?.length == 0" class="text-center">
                     Nothing to show here
                 </div>
@@ -56,13 +58,14 @@
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
     // Components
     import WordCard from '../Components/WordCard.vue'
+    import Pagination from '../Components/Pagination.vue'
 
     const { axiosRequest } = useAxiosRequest()
     const store = useStore()
 
     // Props
     const props = defineProps({
-        wordsList : {type: Array, default: []},
+        wordsList : {type: Object, default: {}},
         isSearching: {type: Boolean, default: false},
         searchData: {type: Object, default: {}},
     })
@@ -70,7 +73,7 @@
     const words = ref([])
 
     watch(() => props.wordsList, (newValue, oldValue) => {
-            words.value = props.wordsList
+            words.value = props.wordsList.data
         }, {deep: true, immediate: true}
     )
 

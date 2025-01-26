@@ -17,9 +17,11 @@ class SearchController extends Controller
         $searchData->type = $type;
         $searchData->searchString = $searchString;
 
+        $wordsPerPage = config('words.words_per_page');
+
         switch ($type) {
             case 'global':
-                $words = Word::with('tags')->where('word', 'like', '%' . $searchString . '%')->orWhere('translation', 'like', '%' . $searchString . '%')->get();
+                $words = Word::with('tags')->where('word', 'like', '%' . $searchString . '%')->orWhere('translation', 'like', '%' . $searchString . '%')->paginate($wordsPerPage);
                 return Inertia::render('WordIndex', [
                     'wordsList' => $words,
                     'isSearching' => true,
@@ -30,7 +32,7 @@ class SearchController extends Controller
             case 'tag':
                 $words = Word::with('tags')->whereHas('tags', function($q) use($searchString){
                     $q->where('tag', $searchString);
-                })->get();
+                })->paginate($wordsPerPage);
 
                 return Inertia::render('WordIndex', [
                     'wordsList' => $words,

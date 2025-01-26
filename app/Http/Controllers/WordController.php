@@ -15,7 +15,8 @@ class WordController extends Controller
 {
     public function index()
     {
-        $words = Word::with('tags')->orderBy('created_at', 'desc')->get();
+        $wordsPerPage = config('words.words_per_page');
+        $words = Word::with('tags')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
 
         return Inertia::render('WordIndex', [
             'wordsList' => $words,
