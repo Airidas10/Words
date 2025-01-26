@@ -20,7 +20,7 @@
                     </svg>
                 </button>
                 <nav :class="['lg:flex', isMenuOpen ? 'block' : 'hidden']" class="absolute lg:static top-12 left-0 bg-blue-800 w-full lg:w-auto lg:bg-transparent lg:space-x-4 space-y-2 lg:space-y-0">
-                    <InertiaLink v-for="(link, index) in links" :key="index" :href="link.href" class="block lg:inline-block text-sm text-blue-300 hover:text-white px-4 py-2 lg:p-0" @click="linkClicked">
+                    <InertiaLink v-for="(link, index) in links" :key="index" :href="link.href" class="block lg:inline-block text-sm text-blue-300 hover:text-white px-4 py-2 lg:p-0" :method="link.href == '/logout' ? 'POST' : 'GET'" @click="linkClicked">
                         {{ link.label }}
                     </InertiaLink>
                 </nav>
@@ -47,22 +47,42 @@
     // Vue stuff
     import { ref, computed, watch } from 'vue'
     // Libraries
-    import { Link as InertiaLink, router } from '@inertiajs/vue3'
+    import { Link as InertiaLink, router, usePage } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
 
     const store = useStore()
 
-    const props = defineProps({
-        // pass shared props if needed
+    const page = usePage()
+
+    const returnedUser = computed(() => page.props.returnedUser)
+    watch(returnedUser, (newValue, oldValue) => {
+        console.log("returnedUser ", returnedUser.value)
+            if(newValue){
+                console.log("setUser", newValue)
+                store.commit("setUser", newValue)
+            } else{
+                console.log("ELSE")
+            }
+        }, {deep: true, immediate: true}
+    )
+
+    const user = computed(() => store.state.user)
+
+    const links = computed(() => {
+        let linkData = [
+            { href: '/', label: 'Home' },
+            { href: '/random', label: 'Random' },
+            { href: '/tags', label: 'Tags' },
+        ]
+
+        if(user.value){
+            linkData.push({href: '/logout', label: 'Logout'})
+        } else{
+            linkData.push({href: '/login', label: 'Login'})
+        }
+
+        return linkData
     })
-
-    const isMenuOpen = ref(false)
-
-    const links = ref([
-        { href: '/', label: 'Home' },
-        { href: '/random', label: 'Random' },
-        { href: '/tags', label: 'Tags' },
-    ])
 
     const searchData = computed(() => store.state.searchData)
     watch(searchData, (newValue, oldValue) => {
@@ -82,7 +102,9 @@
         router.visit('/search/' + type + '/' + string)
     }
 
-    function linkClicked(){
+    const isMenuOpen = ref(false)
+    function linkClicked(link, event){
+        console.log("user", user.value)
         isMenuOpen.value = false
     }
 </script>

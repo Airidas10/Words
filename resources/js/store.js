@@ -4,6 +4,7 @@ export default createStore({
     state: {
         searchData: null,
         showTranslation: true,
+        user: null,
     },
 
     getters: {
@@ -22,5 +23,9 @@ export default createStore({
         setShowTranslation(state, showTranslation){
             state.showTranslation = showTranslation
         },
+
+        setUser(state, user){
+            state.user = user
+        }
     }
 })

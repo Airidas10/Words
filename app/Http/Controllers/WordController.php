@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use Inertia\Inertia;
+
+use Auth;
+
 use App\Models\Word;
 use App\Models\Tag;
 
@@ -17,6 +20,9 @@ class WordController extends Controller
     {
         $wordsPerPage = config('words.words_per_page');
         $words = Word::with('tags')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
+
+        $user = Auth::user();
+        Inertia::share('returnedUser', $user);
 
         return Inertia::render('WordIndex', [
             'wordsList' => $words,

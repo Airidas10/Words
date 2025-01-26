@@ -6,6 +6,8 @@ use App\Http\Controllers\WordController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TagController;
 
+Auth::routes((['register' => false, 'reset' => false, 'verify' => false, 'confirm' => false]));
+
 Route::get('/', [WordController::class, 'index'])->name('words.index');
 Route::get('/words/create', [WordController::class, 'create'])->name('words.create');
 Route::get('/words/{word}', [WordController::class, 'show'])->name('words.show');
