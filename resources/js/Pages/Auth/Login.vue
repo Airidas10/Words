@@ -23,6 +23,9 @@
                     placeholder="Enter your password"
                 />
             </div>
+            <div v-if="displayError" class="text-red-600 text-center mt-2 mb-6">
+                {{ displayError }}
+            </div>
 
             <div class="flex items-center justify-between">
                 <button
@@ -46,16 +49,23 @@
 
 
 <script setup>
-    import { ref } from 'vue'
+    import { ref, computed } from 'vue'
     import { useForm } from '@inertiajs/vue3'
+
+    const props = defineProps({ 
+        errors: Object 
+    })
 
     const form = useForm({
         username: '',
         password: '',
     })
 
+    const displayError = computed(() => {
+        return Object.values(props.errors) ? Object.values(props.errors)[0] : null
+    })
+
     const handleSubmit = () => {
-        console.log("submit form", form)
         form.post('/login')
     }
 
