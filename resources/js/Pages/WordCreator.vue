@@ -14,14 +14,24 @@
             </div>
 
             <div class="mb-6">
-                <label for="translation" class="block text-base font-medium text-gray-700 mb-2">Translation</label>
-                <input
-                    id="translation"
-                    type="text"
-                    v-model="wordData.translation"
-                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                    placeholder="Enter the translation"
-                />
+                <div class="flex items-center justify-between">
+                    <label for="translation" class="block text-base font-medium text-gray-700 mb-2">Translations</label> 
+                    <span class="text-blue-600 text-sm cursor-pointer hover:underline" @click="addTranslation">Add more</span>
+                </div>
+
+                <div v-for="(translation, index) in translations" :key="translation.id" class="relative mb-2">
+                    <input
+                        id="translation"
+                        type="text"
+                        v-model="translation.translation"
+                        class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                        placeholder="Enter the translation"
+                    />
+
+                    <span v-if="translations.length > 1" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 cursor-pointer text-lg" @click="removeTranslation(translation.id)">
+                        &times;
+                    </span>
+                </div>
             </div>
 
             <div class="mb-6">
@@ -115,19 +125,40 @@
 
     const wordData = reactive({
         word: '',
-        translation: '',
         description: '',
         tags: []
     })
+
+    const nextTempTranslationId = computed(() => {
+        return translations.value?.length + 1
+    })
+    const translations = ref([])
+
+    function addTranslation(){
+        let newTranslationObj = {id: 'temp-' + nextTempTranslationId.value, translation: null}
+        translations.value.push(newTranslationObj)
+    }
+
+    function removeTranslation(translationId){
+        let index = translations.value.findIndex(translationObj => translationObj.id == translationId)
+        if(index != -1){
+            translations.value.splice(index, 1)
+        }
+    }
 
     const selectedModalTagIds = ref([])
     const wordDataInitialized = ref(false)
     watch(() => props.word, (newValue, oldValue) => {
             if(props.word && !wordDataInitialized.value){
-                initWordData()
+                initWordData()                
                 wordDataInitialized.value = true
 
                 selectedModalTagIds.value = getSelectedTagIds()
+                translations.value = props.word.translations
+            }
+
+            if(translations.value.length == 0){
+                addTranslation()
             }
         }, {deep: true, immediate: true}
     )
@@ -182,6 +213,7 @@
         let endpoint = mode.value == 'create' ? '/api/words/create' : '/api/words/update/' + props.word.id
         let method = mode.value == 'create' ? 'POST' : 'PUT'
         let apiData = wordData
+        apiData.translations = translations.value
 
         axiosRequest(endpoint, apiData, method, true).then((response) => {
             if(response.data.status == 'success'){

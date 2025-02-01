@@ -3,13 +3,14 @@
         <div class="flex items-center justify-center w-full mb-6">
             <h1 class="text-3xl font-semibold text-gray-800">{{ word.word }}</h1>
             <InertiaLink v-if="isRandomPage" href="/random" class="text-blue-500 text-sm ml-2 hover:underline">Regenerate</InertiaLink>
-        </div>
 
-        <p class="text-gray-600 flex items-center justify-center">
-            <span>{{ showTranslation ? word.translation : '*****' }}</span>
-            <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm" @click="toggleTranslationVisibility">
-                {{ showTranslation ? 'Hide' : 'Show' }} Translation
-            </span>
+        </div>
+        <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm mb-10" @click="toggleTranslationVisibility">
+            {{ showTranslation ? 'Hide' : 'Show' }} Translation
+        </span>
+
+        <p v-for="translation in word.translations" :key="translation.id" class="text-gray-600 flex items-center justify-center">
+            <span>{{ showTranslation ? translation.translation : '*****' }}</span>
         </p>
 
         <div v-if="word.tags.length" class="mt-6 w-full">

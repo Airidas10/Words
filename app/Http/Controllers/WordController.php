@@ -11,6 +11,7 @@ use Auth;
 
 use App\Models\Word;
 use App\Models\Tag;
+use App\Models\Translation;
 
 use App\Http\Requests\WordRequest;
 
@@ -19,7 +20,7 @@ class WordController extends Controller
     public function index()
     {
         $wordsPerPage = config('words.words_per_page');
-        $words = Word::with('tags')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
+        $words = Word::with('tags', 'translations')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
         $user = Auth::user();
 
         return Inertia::render('WordIndex', [
@@ -30,7 +31,7 @@ class WordController extends Controller
 
     public function show($id)
     {
-        $word = Word::with('tags')->findOrFail($id);
+        $word = Word::with('tags', 'translations')->findOrFail($id);
 
         return Inertia::render('Word', [
             'word' => $word,
@@ -56,9 +57,18 @@ class WordController extends Controller
         }
 
         DB::transaction(function() use ($request, &$response){
-            $word = Word::create($request->all());
+            $translationsCollection = collect();
+            if($request->has('translations')){
+                foreach ($request->translations as $translation){
+                    $storedTranslation = Translation::make(['translation' => $translation['translation']]);
+                    $translationsCollection->push($storedTranslation);
+                }
+            }
 
+            $word = Word::create($request->only(['word', 'description']));
             if($word){
+                $word->translations()->saveMany($translationsCollection);
+
                 if($request->has('tags')){
                     $tagIds = collect($request->tags)->pluck('id');
                     $word->tags()->sync($tagIds);
@@ -72,7 +82,7 @@ class WordController extends Controller
 
     public function edit($id)
     {
-        $word = Word::with('tags')->findOrFail($id);
+        $word = Word::with('tags', 'translations')->findOrFail($id);
         $tags = Tag::all();
 
         return Inertia::render('WordCreator', [
@@ -91,9 +101,28 @@ class WordController extends Controller
 
         DB::transaction(function() use ($request, $id, &$response){
             $word = Word::findOrFail($id);
-
             if($word){
-                $word->update($request->all());
+                $handledIds = [];
+                foreach($request->translations as $translationData){
+                    if(isset($translationData['id']) && is_numeric($translationData['id'])){
+                        $translation = Translation::findOrFail($translationData['id']);
+                        if ($translation->translation !== $translationData['translation']){
+                            $translation->update([
+                                'translation' => $translationData['translation'],
+                            ]);
+                        }
+                        $handledIds[] = $translation->id;
+                    } else if(isset($translationData['id']) && is_string($translationData['id'])){
+                        $newTranslation = $word->translations()->create([
+                            'translation' => $translationData['translation'],
+                        ]);
+                        $handledIds[] = $newTranslation->id;
+                    }
+                }
+
+                $word->translations()->whereNotIn('id', $handledIds)->delete();
+
+                $word->update($request->only(['word', 'description']));
                 if($request->has('tags')){
                     $tagIds = collect($request->tags)->pluck('id');
                     $word->tags()->sync($tagIds);

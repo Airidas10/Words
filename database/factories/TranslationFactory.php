@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Word>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Translation>
  */
-class WordFactory extends Factory
+class TranslationFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -16,10 +16,8 @@ class WordFactory extends Factory
      */
     public function definition(): array
     {
-        $word = fake()->unique()->word;
         return [
-            'word' => $word,
-            'description' => fake()->text(),
+            'translation' => 'tr_' . fake()->unique()->word,
         ];
     }
 }
