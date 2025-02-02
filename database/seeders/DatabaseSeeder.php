@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Tag;
 use App\Models\Word;
 use App\Models\Translation;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,6 +26,8 @@ class DatabaseSeeder extends Seeder
             $wordTags = $tags->random($tagsToGet);
             $word->tags()->sync($wordTags->pluck('id'));
         });
+
+        User::create(['username' => 'Foo', 'password' => \Hash::make('secret'), 'is_admin' => 1]);
     }
 
     protected function getRandomTranslationCount()

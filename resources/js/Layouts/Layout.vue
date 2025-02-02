@@ -58,10 +58,11 @@
         let linkData = [
             { href: '/', label: 'Home' },
             { href: '/random', label: 'Random' },
-            { href: '/tags', label: 'Tags' },
         ]
 
         if(user.value){
+            linkData.push({ href: '/daily-dose', label: 'Daily Dose' })
+            linkData.push({ href: '/tags', label: 'Tags' })
             linkData.push({href: '/logout', label: 'Logout'})
         } else{
             linkData.push({href: '/login', label: 'Login'})

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WordController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\TestController;
 
 Auth::routes((['register' => false, 'reset' => false, 'verify' => false, 'confirm' => false]));
 
@@ -16,7 +17,11 @@ Route::get('/words/edit/{id}', [WordController::class, 'edit'])->name('words.edi
 Route::get('/random', [WordController::class, 'getRandomWord'])->name('words.random');
 Route::get('/search/{type}/{searchString?}', [SearchController::class, 'search'])->name('words.search');
 
-Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
-Route::get('/tags/create', [TagController::class, 'create'])->name('tags.create');
-Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
-Route::get('/tags/edit/{id}', [TagController::class, 'edit'])->name('tags.edit');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
+    Route::get('/tags/create', [TagController::class, 'create'])->name('tags.create');
+    Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
+    Route::get('/tags/edit/{id}', [TagController::class, 'edit'])->name('tags.edit');
+
+    Route::get('/daily-dose', [TestController::class, 'index'])->name('tests.index');
+});
