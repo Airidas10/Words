@@ -47,10 +47,11 @@
     // Vue stuff
     import { ref, computed, watch } from 'vue'
     // Libraries
-    import { Link as InertiaLink, router } from '@inertiajs/vue3'
+    import { Link as InertiaLink, router, usePage } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
 
     const store = useStore()
+    const page = usePage()
 
     const user = computed(() => store.state.user)
 
@@ -70,6 +71,15 @@
 
         return linkData
     })
+
+    const token = computed(() => page.props.authToken)
+
+    watch(token, (newToken) => {
+            if(newToken) {
+                window.axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+            }
+        }, { immediate: true }
+    )
 
     const searchData = computed(() => store.state.searchData)
     watch(searchData, (newValue, oldValue) => {

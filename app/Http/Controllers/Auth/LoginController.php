@@ -57,4 +57,10 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
     }
+
+    protected function authenticated(Request $request, $user)
+    {
+        $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
+        session(['token' => $token]);
+    }
 }

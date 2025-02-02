@@ -14,6 +14,6 @@ Route::post('/tags/create', [TagController::class, 'store'])->name('tags.store')
 Route::match(['put', 'patch'], '/tags/update/{id}', [TagController::class, 'update'])->name('tags.update');
 Route::delete('/tags/destroy/{id}', [TagController::class, 'destroy'])->name('tags.destroy');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/tests/submit', [TestController::class, 'submit'])->name('tests.submit');
 });
