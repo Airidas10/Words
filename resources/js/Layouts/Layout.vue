@@ -53,6 +53,22 @@
     const store = useStore()
     const page = usePage()
 
+    const token = computed(() => page.props.authToken)
+    watch(token, (newToken) => {
+            if(newToken) {
+                window.axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+            }
+        }, { immediate: true }
+    )
+
+    const authUser = computed(() => page.props.user)
+    watch(authUser, (newValue, oldValue) => {
+            if(newValue){
+                store.commit("setUser", newValue)
+            }
+        }, {deep: true, immediate: true}
+    )
+
     const user = computed(() => store.state.user)
 
     const links = computed(() => {
@@ -71,15 +87,6 @@
 
         return linkData
     })
-
-    const token = computed(() => page.props.authToken)
-
-    watch(token, (newToken) => {
-            if(newToken) {
-                window.axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
-            }
-        }, { immediate: true }
-    )
 
     const searchData = computed(() => store.state.searchData)
     watch(searchData, (newValue, oldValue) => {

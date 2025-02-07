@@ -21,11 +21,9 @@ class WordController extends Controller
     {
         $wordsPerPage = config('words.words_per_page');
         $words = Word::with('tags', 'translations')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
-        $user = Auth::user();
 
         return Inertia::render('WordIndex', [
             'wordsList' => $words,
-            'user' => $user,
         ]);
     }
 
@@ -151,7 +149,7 @@ class WordController extends Controller
 
     public function getRandomWord(Request $request)
     {
-        $word = Word::with('tags')->inRandomOrder()->first();
+        $word = Word::with('tags', 'translations')->inRandomOrder()->first();
 
         if($request->ajax() && $request->header('Accept') === 'application/json'){
             return ['status' => 'success', 'msg' => 'Data fetched successfully', 'data' => $word];

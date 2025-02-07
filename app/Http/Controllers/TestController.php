@@ -56,7 +56,6 @@ class TestController extends Controller
         return Inertia::render('TestIndex', [
             'testId' => $testId,
             'testJson' => $testJson,
-            // 'user' => $user,
         ]);
     }
 
