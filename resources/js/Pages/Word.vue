@@ -5,11 +5,12 @@
             <InertiaLink v-if="isRandomPage" href="/random" class="text-blue-500 text-sm ml-2 hover:underline">Regenerate</InertiaLink>
 
         </div>
-        <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm mb-10" @click="toggleTranslationVisibility">
+        <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm mb-4" @click="toggleTranslationVisibility">
             {{ showTranslation ? 'Hide' : 'Show' }} Translation
         </span>
 
-        <p v-for="translation in word.translations" :key="translation.id" class="text-gray-600 flex items-center justify-center">
+        <h1 class="text-xl font-semibold text-gray-800">{{ translationHeader }}</h1>
+        <p v-for="translation in word.translations" :key="translation.id" class="text-lg text-gray-600 flex items-center justify-center">
             <span>{{ showTranslation ? translation.translation : '*****' }}</span>
         </p>
 
@@ -24,6 +25,11 @@
 
         <div v-else class="mt-6 w-full text-center">
             <p class="text-gray-600">No tags available.</p>
+        </div>
+
+        <div v-if="word.description" class="mt-6 w-full text-center p-3 border border-gray-100 rounded-lg bg-gray-50 shadow-sm">
+            <h3 class="text-lg font-medium text-gray-800">Description:</h3>
+            <p class="text-gray-700 whitespace-pre-line">{{ word.description }}</p>
         </div>
 
         <div class="mt-6 w-full text-center">
@@ -64,6 +70,10 @@
     function toggleTranslationVisibility(){
         store.commit('setShowTranslation', !showTranslation.value)
     }
+
+    const translationHeader = computed(() => {
+        return props.word?.translations?.length > 1 ? 'Translations:' : 'Translation:'
+    })
 
 </script>
 
