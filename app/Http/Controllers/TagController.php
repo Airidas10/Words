@@ -22,7 +22,7 @@ class TagController extends Controller
 
     public function show($id)
     {
-        $tag = Tag::with('words')->findOrFail($id);
+        $tag = Tag::with('words.translations')->findOrFail($id);
 
         return Inertia::render('Tag', [
             'tag' => $tag,
