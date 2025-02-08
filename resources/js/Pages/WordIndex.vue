@@ -19,7 +19,7 @@
                         {{ showTranslation ? 'Hide Translation' : 'Show Translation' }}
                     </button>
 
-                    <InertiaLink v-if="!isSearching" href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <InertiaLink v-if="(!isSearching && user)" href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Create New
                     </InertiaLink>
                 </div>
@@ -76,6 +76,8 @@
             words.value = props.wordsList.data
         }, {deep: true, immediate: true}
     )
+
+    const user = computed(() => store.state.user)
 
     function handleTagClick(data){
         let tagObj = data.tag

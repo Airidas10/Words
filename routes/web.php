@@ -9,15 +9,10 @@ use App\Http\Controllers\TestController;
 
 Auth::routes((['register' => false, 'reset' => false, 'verify' => false, 'confirm' => false]));
 
-Route::get('/', [WordController::class, 'index'])->name('words.index');
-Route::get('/words/create', [WordController::class, 'create'])->name('words.create');
-Route::get('/words/{word}', [WordController::class, 'show'])->name('words.show');
-Route::get('/words/edit/{id}', [WordController::class, 'edit'])->name('words.edit');
-
-Route::get('/random', [WordController::class, 'getRandomWord'])->name('words.random');
-Route::get('/search/{type}/{searchString?}', [SearchController::class, 'search'])->name('words.search');
-
 Route::middleware(['auth'])->group(function () {
+    Route::get('/words/create', [WordController::class, 'create'])->name('words.create');
+    Route::get('/words/edit/{id}', [WordController::class, 'edit'])->name('words.edit');
+
     Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
     Route::get('/tags/create', [TagController::class, 'create'])->name('tags.create');
     Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
@@ -25,3 +20,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/daily-dose', [TestController::class, 'index'])->name('tests.index');
 });
+
+Route::get('/', [WordController::class, 'index'])->name('words.index');
+Route::get('/words/{word}', [WordController::class, 'show'])->name('words.show');
+Route::get('/random', [WordController::class, 'getRandomWord'])->name('words.random');
+Route::get('/search/{type}/{searchString?}', [SearchController::class, 'search'])->name('words.search');
