@@ -23,7 +23,6 @@ Homestead.json
 /.vagrant
 .phpunit.result.cache
 
-/public/build
 /storage/pail
 .env.backup
 .env.production
@@ -32,7 +31,6 @@ auth.json
 =======
 /.phpunit.cache
 /node_modules
-/public/build
 /public/hot
 /public/storage
 /storage/*.key
