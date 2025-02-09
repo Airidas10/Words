@@ -19,6 +19,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tags/edit/{id}', [TagController::class, 'edit'])->name('tags.edit');
 
     Route::get('/daily-dose', [TestController::class, 'index'])->name('tests.index');
+    Route::get('/my-tests', [TestController::class, 'myTests'])->name('tests.tests');
+    Route::get('/runs/{id}', [TestController::class, 'show'])->name('tests.show');
 });
 
 Route::get('/', [WordController::class, 'index'])->name('words.index');

@@ -79,6 +79,7 @@
 
         if(user.value){
             linkData.push({ href: '/daily-dose', label: 'Daily Dose' })
+            linkData.push({ href: '/my-tests', label: 'My Tests' })
             linkData.push({ href: '/tags', label: 'Tags' })
             linkData.push({href: '/logout', label: 'Logout'})
         } else{

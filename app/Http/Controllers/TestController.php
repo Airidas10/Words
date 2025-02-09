@@ -53,7 +53,7 @@ class TestController extends Controller
             $testId = $lastTest->id;
         }
 
-        return Inertia::render('TestIndex', [
+        return Inertia::render('TestRun', [
             'testId' => $testId,
             'testJson' => $testJson,
         ]);
@@ -84,7 +84,6 @@ class TestController extends Controller
 
             $questionsAndAnswers = json_decode($testRun->questions_and_answers, true);
 
-            $answers = collect();
             $score = 0;
             foreach($request->testData as $key => $datum){
                 $correct = false;
@@ -96,7 +95,6 @@ class TestController extends Controller
                 switch ($datum['type']){
                     case 'w':
                         $translations = $wordAsked->translations->pluck('translation');
-                        // $correctAnswer = $translations[0];
                         foreach($translations as $index => $translation){
                             $translation = mb_strtolower($translation);
                             if($index == 0){
@@ -107,7 +105,6 @@ class TestController extends Controller
                             if($answer == $translation){
                                 $correct = true;
                                 $score++;
-                                // break;
                             }
                         }
 
@@ -123,21 +120,37 @@ class TestController extends Controller
                         \Log::error("Undefined type " . $datum['type']);
                         break;
                 }
-
-                $answerData = ['id' => $wordAsked->id, 'correct' => $correct, 'correctAnswer' => $correctAnswer];
-                $answers->push($answerData);
+                $questionsAndAnswers[$key]['correct'] = $correct; 
+                $questionsAndAnswers[$key]['correctAnswer'] = $correctAnswer; 
             }
-
-            $data['score'] = $score;
-            $data['answers'] = $answers;
 
             $testRun->questions_and_answers = json_encode($questionsAndAnswers);
             $testRun->score = $score;
             $testRun->save();
 
-            $response = ['status' => 'success', 'msg' => 'Test was submitted!', 'data' => $data];
+            $response = ['status' => 'success', 'msg' => 'Test was submitted!', 'data' => $testRun];
         }, 5);
 
         return $response;
+    }
+
+    public function myTests()
+    {
+        $user = Auth::user();
+
+        $userTests = $user->tests()->finished()->orderBy('created_at', 'desc')->paginate(10);
+
+        return Inertia::render('MyTests', [
+            'userTests' => $userTests,
+        ]);
+    }
+
+    public function show($id)
+    {
+        $test = Test::finished()->findOrFail($id);
+
+        return Inertia::render('Test', [
+            'test' => $test,
+        ]);
     }
 }
