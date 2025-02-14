@@ -1,16 +1,23 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-BGWuBWAz.css",
+    "file": "assets/app-BsnCbFsB.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
+  "resources/js/Assets/pinched.svg": {
+    "file": "assets/pinched-BdNG-E3V.svg",
+    "src": "resources/js/Assets/pinched.svg"
+  },
   "resources/js/app.js": {
-    "file": "assets/app-BAhpXoep.js",
+    "file": "assets/app-C-OThqyC.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
       "assets/app-CY370s16.css"
+    ],
+    "assets": [
+      "assets/pinched-BdNG-E3V.svg"
     ]
   }
 }

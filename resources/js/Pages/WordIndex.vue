@@ -3,8 +3,8 @@
         <div class="min-h-screen bg-gray-100 p-6">
             <div class="max-w-7xl mx-auto">
                 <header class="text-center mb-10">
-                    <h1 class="text-4xl font-bold text-gray-800">CHANGEME TITLE</h1>
-                    <p class="text-gray-600">CHANGEME DESCRIPTION</p>
+                    <h1 class="text-4xl font-bold text-gray-800">Paroles</h1>
+                    <p class="text-gray-600">Ho Bisogno Di Imparare L'Italiano!</p>
                 </header>
 
                 <div v-if="isSearching" class="mt-8 text-center">

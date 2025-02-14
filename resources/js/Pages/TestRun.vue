@@ -5,6 +5,7 @@
             <div class="w-2/3 flex items-center space-x-3">
                 <input
                     :id="'question-' + index"
+                    autocomplete="off"
                     v-model="item.answer"
                     type="text"
                     :class="{

@@ -3,7 +3,7 @@
         <header class="bg-blue-800 text-white sticky top-0 z-50 shadow">
             <div class="container mx-auto px-4 py-3 flex items-center justify-between">
                 <InertiaLink href="/">
-                    <h1 class="text-lg font-bold">CHANGEME</h1>
+                    <img :src="logo" alt="Logo" class="h-12">
                 </InertiaLink>
 
                 <div class="relative lg:block">
@@ -49,6 +49,8 @@
     // Libraries
     import { Link as InertiaLink, router, usePage } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
+    // Assets
+    import logo from '@/assets/pinched.svg'
 
     const store = useStore()
     const page = usePage()

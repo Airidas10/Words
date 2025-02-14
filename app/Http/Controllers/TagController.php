@@ -13,7 +13,7 @@ class TagController extends Controller
 {
     public function index()
     {
-        $tags = Tag::withCount('words')->orderBy('created_at', 'asc')->get();
+        $tags = Tag::withCount('words')->orderBy('tag', 'asc')->get();
 
         return Inertia::render('TagsIndex', [
             'tags' => $tags
