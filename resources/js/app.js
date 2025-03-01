@@ -14,7 +14,7 @@ createInertiaApp({
         return page
     },
 
-    title: title => `${title} Paroles`,
+    title: title => `${title} Parole`,
 
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
