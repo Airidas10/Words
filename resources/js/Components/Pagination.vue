@@ -31,6 +31,11 @@
             shouldShow = false
         }
 
+        let distance = activeLink.value?.label - link.label
+        if(distance > 1 || distance < -1){
+            shouldShow = false
+        }
+
         return shouldShow
     }
 

@@ -4,8 +4,8 @@
             <h1 class="text-4xl font-bold text-gray-800">Your score is: {{ test.score }} / {{ test.number_of_questions }}</h1>
         </div>
 
-        <div class="max-w-4xl mx-auto px-4">
-            <table class="w-full border-collapse border border-gray-300">
+        <div class="overflow-x-auto w-full">
+            <table class="min-w-full border-collapse border border-gray-300">
                 <thead>
                     <tr class="bg-gray-200">
                         <th class="border border-gray-300 px-4 py-2 text-left">Question</th>

@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col min-h-screen">
-        <header class="bg-blue-800 text-white sticky top-0 z-50 shadow">
+        <header class="bg-blue-800 text-white sticky top-0 z-50 shadow w-full">
             <div class="container mx-auto px-4 py-3 flex items-center justify-between">
                 <InertiaLink href="/">
                     <img :src="logo" alt="Logo" class="h-12">

@@ -1,7 +1,7 @@
 <template>
-    <div class="homepage">
+    <div class="homepage w-full">
         <div class="min-h-screen bg-gray-100 p-6">
-            <div class="max-w-7xl mx-auto">
+            <div class="max-w-7xl mx-auto w-full">
                 <header class="text-center mb-10">
                     <h1 class="text-4xl font-bold text-gray-800">Parole</h1>
                     <p class="text-gray-600">Ho Bisogno Di Imparare L'Italiano! 🤌</p>
@@ -24,7 +24,7 @@
                     </InertiaLink>
                 </div>
 
-                <div v-if="words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div v-if="words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-full">
                     <div v-for="word in words">
                         <InertiaLink :href="`/words/${word.id}`">
                             <word-card :word="word" @tagClick="handleTagClick"></word-card>
@@ -110,3 +110,11 @@
         store.commit('setShowTranslation', !showTranslation.value)
     }
 </script>
+
+<style scoped>
+    html, body {
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        width: 100%;
+        margin: 0;
+    }
+</style>
