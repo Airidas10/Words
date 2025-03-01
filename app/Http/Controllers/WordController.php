@@ -38,7 +38,7 @@ class WordController extends Controller
 
     public function create()
     {
-        $tags = Tag::all();
+        $tags = Tag::orderBy('tag')->get();
 
         return Inertia::render('WordCreator', [
             'word' => null, 
@@ -81,7 +81,7 @@ class WordController extends Controller
     public function edit($id)
     {
         $word = Word::with('tags', 'translations')->findOrFail($id);
-        $tags = Tag::all();
+        $tags = Tag::orderBy('tag')->get();
 
         return Inertia::render('WordCreator', [
             'word' => $word,
