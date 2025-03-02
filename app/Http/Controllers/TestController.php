@@ -33,12 +33,14 @@ class TestController extends Controller
                     $dataObj->put('type', 'w');
                     $dataObj->put('question', $wordObj->word);
                     $dataObj->put('answer', '');
+                    $dataObj->put('help', '');
                 } else{
-                    $translationObj = Translation::select('word_id', 'translation')->whereNotIn('word_id', $usedWordIds)->inRandomOrder()->first();
+                    $translationObj = Translation::select('word_id', 'translation', 'test_help')->whereNotIn('word_id', $usedWordIds)->inRandomOrder()->first();
                     $dataObj->put('id', $translationObj->word_id);
                     $dataObj->put('type', 't');
                     $dataObj->put('question', $translationObj->translation);
                     $dataObj->put('answer', '');
+                    $dataObj->put('help', $translationObj->test_help);
                 }
                 $usedWordIds[] = $dataObj->get('id');
                 $testData->put($i, $dataObj);

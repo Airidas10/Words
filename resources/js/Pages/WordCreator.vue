@@ -20,17 +20,37 @@
                 </div>
 
                 <div v-for="(translation, index) in translations" :key="translation.id" class="relative mb-2">
-                    <input
-                        id="translation"
-                        type="text"
-                        v-model="translation.translation"
-                        class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                        placeholder="Enter the translation"
-                    />
+                    <div class="relative">
+                        <input
+                            :id="'translation-' + translation.id"
+                            type="text"
+                            v-model="translation.translation"
+                            class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                            placeholder="Enter the translation"
+                        />
 
-                    <span v-if="translations.length > 1" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 cursor-pointer text-lg" @click="removeTranslation(translation.id)">
-                        &times;
-                    </span>
+                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-2">
+                            <span v-if="!translationHasHelpInput(translation)" class="text-gray-400 hover:text-blue-500 cursor-pointer text-lg" @click="addHelpInput(translation.id)" title="Add translation help">
+                                ❓
+                            </span>
+
+                            <span v-if="translations.length > 1" class="text-gray-400 hover:text-red-500 cursor-pointer text-lg" @click="removeTranslation(translation.id)">
+                                &times;
+                            </span>
+                        </div>
+                    </div>
+
+                    <div v-if="translationHasHelpInput(translation)" class="relative mt-2 ml-5">
+                        <input
+                            type="text"
+                            v-model="translation.test_help"
+                            class="w-full mt-2 ml-5 p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                            placeholder="Enter help text..."
+                        />
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 cursor-pointer text-lg" @click="removeHelpInput(translation.id)" title="Remove translation help">
+                            &times;
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -78,7 +98,7 @@
             <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Select Tags</h2>
                 <div class="grid grid-cols-2 gap-4">
-                    <div v-for="tag in props.tags" :key="tag.id" class="flex items-center gap-2">
+                    <div v-for="tag in tags" :key="tag.id" class="flex items-center gap-2">
                         <input type="checkbox" :id="`tag-${tag.id}`" :value="tag.id" v-model="selectedModalTagIds" class="rounded text-blue-600 focus:ring-blue-500"/>
                         <label :for="`tag-${tag.id}`" class="text-gray-700">{{ tag.tag }}</label>
                     </div>
@@ -95,8 +115,6 @@
         </div>
     </div>
 </template>
-
-
 
 <script>
     export default{
@@ -120,7 +138,6 @@
         tags: {type: Array, default: {}},
     })
 
-
     const wordData = reactive({
         word: '',
         description: '',
@@ -133,7 +150,7 @@
     const translations = ref([])
 
     function addTranslation(){
-        let newTranslationObj = {id: 'temp-' + nextTempTranslationId.value, translation: null}
+        let newTranslationObj = {id: 'temp-' + nextTempTranslationId.value, translation: null, test_help: null}
         translations.value.push(newTranslationObj)
     }
 
@@ -141,6 +158,24 @@
         let index = translations.value.findIndex(translationObj => translationObj.id == translationId)
         if(index != -1){
             translations.value.splice(index, 1)
+        }
+    }
+
+    function translationHasHelpInput(translationObj){
+        return (translationObj?.test_help === null) ? false : true
+    }
+
+    function addHelpInput(translationId){
+        let translationObj = translations.value.find(translationObj => translationObj.id == translationId)
+        if(translationObj){
+            translationObj.test_help = ''
+        }
+    }
+
+    function removeHelpInput(translationId){
+        let translationObj = translations.value.find(translationObj => translationObj.id == translationId)
+        if(translationObj){
+            translationObj.test_help = null
         }
     }
 

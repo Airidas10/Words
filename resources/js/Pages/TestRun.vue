@@ -1,7 +1,20 @@
 <template>
     <div class="max-w-4xl mx-auto space-y-4 px-4">
         <div v-for="(item, index) in testData" :key="index" class="flex items-center justify-between">
-            <label :for="'question-' + index" class="text-base font-medium text-gray-700 w-1/3">{{ item.question }}</label>
+            <label :for="'question-' + index" class="text-base font-medium text-gray-700 w-1/3">
+                {{ item.question }}
+                <span v-if="item.help" class="ml-2 text-blue-500 cursor-pointer" @click.prevent.stop="togglePopover(item)">
+                     ℹ️ 
+                </span>
+            </label>
+
+            <div @click.prevent.stop v-if="item.showPopover" class="absolute bg-white border shadow-lg p-2 rounded-lg mt-1 z-10 w-48">
+                <p class="text-sm text-gray-700">{{ item.help }}</p>
+                <button @click.prevent.stop="togglePopover(item)" class="text-red-500 text-xs mt-2 underline">
+                    Close
+                </button>
+            </div>
+
             <div class="w-2/3 flex items-center space-x-3">
                 <input
                     :id="'question-' + index"
@@ -51,6 +64,10 @@
             testData.value = JSON.parse(props.testJson)
         }, {deep: true, immediate: true}
     )
+
+    function togglePopover(item){
+        item.showPopover = !item.showPopover
+    }
 
     function handleButtonClick(){
         if(confirm("Are you sure you are ready to submit your answers?") == true) {

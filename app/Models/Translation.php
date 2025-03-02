@@ -10,7 +10,7 @@ class Translation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['translation'];
+    protected $fillable = ['translation', 'test_help', 'hidden_from_card'];
     
     public function word(): BelongsTo
     {

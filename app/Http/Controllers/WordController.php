@@ -58,7 +58,7 @@ class WordController extends Controller
             $translationsCollection = collect();
             if($request->has('translations')){
                 foreach ($request->translations as $translation){
-                    $storedTranslation = Translation::make(['translation' => $translation['translation']]);
+                    $storedTranslation = Translation::make(['translation' => $translation['translation'], 'test_help' => $translation['test_help']]);
                     $translationsCollection->push($storedTranslation);
                 }
             }
@@ -104,15 +104,17 @@ class WordController extends Controller
                 foreach($request->translations as $translationData){
                     if(isset($translationData['id']) && is_numeric($translationData['id'])){
                         $translation = Translation::findOrFail($translationData['id']);
-                        if ($translation->translation !== $translationData['translation']){
+                        if ($translation->translation !== $translationData['translation'] || $translation->test_help !== $translationData['test_help']){
                             $translation->update([
                                 'translation' => $translationData['translation'],
+                                'test_help' => $translationData['test_help']
                             ]);
                         }
                         $handledIds[] = $translation->id;
                     } else if(isset($translationData['id']) && is_string($translationData['id'])){
                         $newTranslation = $word->translations()->create([
                             'translation' => $translationData['translation'],
+                            'test_help' => $translationData['test_help']
                         ]);
                         $handledIds[] = $newTranslation->id;
                     }
