@@ -4,7 +4,7 @@
             <div class="mt-8 text-center">
                 <h1 class="text-4xl font-bold text-gray-800">{{ message }}</h1>
                 <InertiaLink href="/" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    &larr; Back to Words
+                    &larr; Back to Home
                 </InertiaLink>
             </div>    
         </div>

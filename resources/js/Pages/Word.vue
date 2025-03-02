@@ -33,9 +33,7 @@
         </div>
 
         <div class="mt-6 w-full text-center">
-            <InertiaLink href="/" class="text-blue-600 hover:text-blue-800 font-medium">
-                &larr; Back to Words
-            </InertiaLink>
+            <a class="text-blue-600 hover:text-blue-800 text-sm font-medium" href="#" onclick="history.back()">&larr; Go Back</a>
         </div>
     </div>
 </template>

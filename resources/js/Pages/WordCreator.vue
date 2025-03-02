@@ -71,9 +71,7 @@
         </form>
 
         <div class="mt-8 text-center">
-            <InertiaLink href="/" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                &larr; Back to Words
-            </InertiaLink>
+            <a class="text-blue-600 hover:text-blue-800 text-sm font-medium" href="#" onclick="history.back()">&larr; Go Back</a>
         </div>
 
         <div v-if="showTagModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
