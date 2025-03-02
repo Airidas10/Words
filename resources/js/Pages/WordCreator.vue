@@ -127,8 +127,11 @@
     import { ref, reactive, computed, watch } from 'vue'
     // Libraries
     import { Link as InertiaLink, router } from '@inertiajs/vue3'
+    import { useStore } from 'vuex'
     // Reusables
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
+
+    const store = useStore()
 
     const { axiosRequest } = useAxiosRequest()
 
@@ -240,7 +243,11 @@
 
     const mode = computed(() => { 
         return props.word === null ? 'create' : 'edit'
-    }) 
+    })
+
+    const wordEditUrl = computed(() => {
+        return store.state.wordEditUrl ? store.state.wordEditUrl : '/'
+    })
 
     function saveButtonClicked(){
         let endpoint = mode.value == 'create' ? '/api/words/create' : '/api/words/update/' + props.word.id
@@ -250,7 +257,7 @@
 
         axiosRequest(endpoint, apiData, method, true).then((response) => {
             if(response.data.status == 'success'){
-                router.visit('/')
+                router.visit(wordEditUrl.value)
             } else{
                 alert(response.data.msg)
             }
@@ -265,7 +272,7 @@
         axiosRequest(endpoint, apiData, method).then((response) => {
             console.log("response", response)
             if(response.status == 'success'){
-                router.visit('/')
+                router.visit(wordEditUrl.value)
             } else{
                 alert(response.msg)
             }

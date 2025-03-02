@@ -5,6 +5,7 @@ export default createStore({
         searchData: null,
         showTranslation: true,
         user: null,
+        wordEditUrl: null,
     },
 
     getters: {
@@ -26,6 +27,10 @@ export default createStore({
 
         setUser(state, user){
             state.user = user
-        }
+        },
+
+        saveWordEditUrl(state, url){
+            state.wordEditUrl = url
+        },
     }
 })
