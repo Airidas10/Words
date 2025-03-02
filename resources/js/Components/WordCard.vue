@@ -19,7 +19,7 @@
             </button>
 
             <!-- Popover Content -->
-            <div v-if="isPopoverOpen" class="absolute left-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 border border-gray-200 z-50">
+            <div v-if="isPopoverOpen" @click.prevent.stop class="absolute left-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 border border-gray-200 z-50">
                 <p class="text-gray-700 text-sm">
                     {{ word.description }}
                 </p>
