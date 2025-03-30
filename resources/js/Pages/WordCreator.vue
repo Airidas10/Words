@@ -94,16 +94,16 @@
             <a class="text-blue-600 hover:text-blue-800 text-sm font-medium" href="#" onclick="history.back()">&larr; Go Back</a>
         </div>
 
-        <div v-if="showTagModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Select Tags</h2>
-                <div class="grid grid-cols-2 gap-4">
+        <div v-if="showTagModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">Select Tags</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div v-for="tag in tags" :key="tag.id" class="flex items-center gap-2">
                         <input type="checkbox" :id="`tag-${tag.id}`" :value="tag.id" v-model="selectedModalTagIds" class="rounded text-blue-600 focus:ring-blue-500"/>
                         <label :for="`tag-${tag.id}`" class="text-gray-700">{{ tag.tag }}</label>
                     </div>
                 </div>
-                <div class="flex justify-end mt-6 gap-4">
+                <div class="flex justify-center mt-6 gap-4">
                     <button type="button" class="bg-gray-200 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-400" @click="closeTagModal">
                         Cancel
                     </button>
