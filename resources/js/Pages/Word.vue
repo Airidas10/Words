@@ -14,7 +14,7 @@
             <span>{{ showTranslation ? translation.translation : '*****' }}</span>
         </p>
 
-        <div v-if="word.tags.length" class="mt-6 w-full">
+        <div v-if="word.tags?.length && showTags" class="mt-6 w-full">
             <h3 class="text-lg font-medium text-gray-800 text-center">Tags:</h3>
             <ul class="flex flex-wrap justify-center gap-2 mt-2">
                 <li v-for="tag in word.tags" :key="tag.id" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">
@@ -23,13 +23,20 @@
             </ul>
         </div>
 
-        <div v-else class="mt-6 w-full text-center">
+        <div v-else-if="word.tags?.length == 0" class="mt-6 w-full text-center">
             <p class="text-gray-600">No tags available.</p>
         </div>
+        <div v-else-if="!showTags" class="mt-6 w-full text-center">
+            <p class="text-gray-600">Tags are hidden.</p> <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm mb-4" @click="toggleTags">{{ showTags ? 'Hide' : 'Show' }}</span>
+        </div>
 
-        <div v-if="word.description" class="mt-6 w-full text-center p-3 border border-gray-100 rounded-lg bg-gray-50 shadow-sm">
+        <div v-if="word.description && showDescription" class="mt-6 w-full text-center p-3 border border-gray-100 rounded-lg bg-gray-50 shadow-sm">
             <h3 class="text-lg font-medium text-gray-800">Description:</h3>
             <p class="text-gray-700 whitespace-pre-line">{{ word.description }}</p>
+        </div>
+
+        <div v-else-if="word.description && !showDescription" class="mt-6 w-full text-center">
+            <p class="text-gray-600">Description is hidden.</p> <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm mb-4" @click="toggleDescription">{{ showDescription ? 'Hide' : 'Show' }}</span>
         </div>
 
         <div class="mt-6 w-full text-center">
@@ -46,7 +53,7 @@
 
 <script setup>
     // Vue stuff
-    import { computed } from 'vue' 
+    import { computed, ref, watch } from 'vue' 
     // Libraries
     import { Link as InertiaLink, usePage } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
@@ -64,6 +71,28 @@
     })
 
     const showTranslation = computed(() => store.state.showTranslation)
+
+    const showTags = ref(true)
+    const showDescription = ref(true)
+
+    function toggleDescription(){
+        showDescription.value = ! showDescription.value
+    }
+
+    function toggleTags(){
+        showTags.value = ! showTags.value
+    }
+
+    watch(showTranslation, () => {
+            if(showTranslation.value){
+                showTags.value = true
+                showDescription.value = true
+            } else{
+                showTags.value = false
+                showDescription.value = false
+            }
+        }, {immediate: true }
+    )
 
     function toggleTranslationVisibility(){
         store.commit('setShowTranslation', !showTranslation.value)
