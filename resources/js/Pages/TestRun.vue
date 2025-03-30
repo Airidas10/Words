@@ -24,7 +24,7 @@
                     :class="{
                         'flex-1 p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400': true,
                     }"
-                    placeholder="Your answer"
+                    :placeholder="getPlaceholder(item)"
                 />
             </div>
         </div>
@@ -64,6 +64,10 @@
             testData.value = JSON.parse(props.testJson)
         }, {deep: true, immediate: true}
     )
+
+    function getPlaceholder(item){
+        return item?.type == 't' ? "Your answer (IT)" : "Your answer (LT)"
+    }
 
     function togglePopover(item){
         item.showPopover = !item.showPopover
