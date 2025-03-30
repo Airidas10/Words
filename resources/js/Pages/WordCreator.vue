@@ -265,6 +265,12 @@
     }
 
     function deleteButtonClicked(){
+        if(confirm("Are you sure you want to delete this word?") == true) {
+            handleDeletion()
+        }
+    }
+
+    function handleDeletion(){
         let endpoint = '/api/words/destroy/' + props.word.id
         let method = 'DELETE'
         let apiData = {}

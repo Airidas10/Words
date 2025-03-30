@@ -101,6 +101,12 @@
     }
 
     function deleteButtonClicked(){
+        if(confirm("Are you sure you want to delete this tag?") == true) {
+            handleDeletion()
+        }
+    }
+
+    function handleDeletion(){
         let endpoint = '/api/tags/destroy/' + props.tag.id
         let method = 'DELETE'
         let apiData = {}
