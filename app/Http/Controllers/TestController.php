@@ -149,7 +149,10 @@ class TestController extends Controller
 
     public function show($id)
     {
+        $user = Auth::user();
         $test = Test::finished()->findOrFail($id);
+
+        abort_if($test && $user && ($test->user_id != $user->id), 403, 'You are not allowed to view this test!');
 
         return Inertia::render('Test', [
             'test' => $test,
