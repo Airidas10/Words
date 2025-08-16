@@ -17,7 +17,7 @@
                 <tbody>
                     <tr v-for="(item, index) in testData" :key="index" class="border-t">
                         <td class="border border-gray-300 px-4 py-2">{{ item.question }}</td>
-                        <td class="border border-gray-300 px-4 py-2">{{ item.answer }}</td>
+                        <td class="border border-gray-300 px-4 py-2 whitespace-pre-wrap">{{ item.answer }}</td>
                         <td class="border border-gray-300 px-4 py-2">{{ item.correctAnswer }}</td>
                         <td class="border border-gray-300 px-4 py-2 text-center">
                             <span v-if="item.correct === true" class="text-green-500 text-xl">✔</span>
