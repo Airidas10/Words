@@ -4,6 +4,22 @@
             <h1 class="text-2xl font-semibold text-gray-800">My Tests</h1>
         </div>
 
+
+        <div v-if="totalTests !== null" class="flex flex-col sm:flex-row justify-center items-center gap-6 mb-6">
+            <div class="bg-blue-100 text-blue-800 px-6 py-4 rounded-lg shadow flex flex-col items-center">
+                <span class="text-3xl font-bold">{{ totalTests }}</span>
+                <span class="text-sm font-medium mt-1">Total Tests</span>
+            </div>
+            <div class="bg-green-100 text-green-800 px-6 py-4 rounded-lg shadow flex flex-col items-center">
+                <span class="text-3xl font-bold">
+                    {{ avgScoreDisplay }}
+                </span>
+                <span class="text-sm font-medium mt-1">Average Score</span>
+            </div>
+        </div>
+
+
+
         <div class="overflow-x-auto w-full">
             <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
                 <thead>
@@ -42,7 +58,7 @@
 
 <script setup>
     // Vue stuff
-    import { ref, watch } from 'vue'
+    import { computed, ref, watch } from 'vue'
     // Libraries
     import { Link as InertiaLink, router } from '@inertiajs/vue3'
 
@@ -53,6 +69,8 @@
     // Props
     const props = defineProps({
         userTests : {type: Object, default: {}},
+        totalTests: {type: Number, default: null},
+        averageScore: {type: String, default: null},
     })
 
     const tests = ref([])
@@ -68,4 +86,16 @@
     function handleRowClick(test){
         router.visit('/runs/' + test.id)
     }
+    
+    const avgScoreDisplay = computed(() => {
+        let avgScore = '-'
+        if(props.averageScore !== null){
+            let number = Number(props.averageScore)
+            if(!isNaN(number)){
+                avgScore = number.toFixed(2)
+            }
+        }
+        
+        return avgScore
+    })
 </script>

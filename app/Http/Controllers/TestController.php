@@ -140,10 +140,15 @@ class TestController extends Controller
     {
         $user = Auth::user();
 
-        $userTests = $user->tests()->finished()->orderBy('created_at', 'desc')->paginate(10);
+        $testsQuery = $user->tests()->finished()->orderBy('created_at', 'desc');
+        $totalTests = $testsQuery->count();
+        $averageScore = $testsQuery->avg('score');
+        $userTests = $testsQuery->paginate(10);
 
         return Inertia::render('MyTests', [
             'userTests' => $userTests,
+            'totalTests' => $totalTests,
+            'averageScore' => $averageScore,
         ]);
     }
 
