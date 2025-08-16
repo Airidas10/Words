@@ -12,6 +12,7 @@ Auth::routes((['register' => false, 'reset' => false, 'verify' => false, 'confir
 Route::middleware(['auth'])->group(function () {
     Route::get('/words/create', [WordController::class, 'create'])->name('words.create');
     Route::get('/words/edit/{id}', [WordController::class, 'edit'])->name('words.edit');
+    Route::get('/export', [WordController::class, 'export'])->name('words.export');
 
     Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
     Route::get('/tags/create', [TagController::class, 'create'])->name('tags.create');

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use Inertia\Inertia;
+use \Carbon\Carbon;
 
 use Auth;
 
@@ -21,9 +22,11 @@ class WordController extends Controller
     {
         $wordsPerPage = config('words.words_per_page');
         $words = Word::with('tags', 'translations')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
+        $wordCount = Word::count();
 
         return Inertia::render('WordIndex', [
             'wordsList' => $words,
+            'totalWordCount' => $wordCount,
         ]);
     }
 
@@ -160,5 +163,54 @@ class WordController extends Controller
                 'word' => $word
             ]);
         }  
+    }
+    
+    public function export(Request $request)
+    {
+        try {
+            $csvFile = $this->generateWordsCsv();
+        } catch (\Exception $e) {
+            $csvFile = null;
+            \Log::error('CSV file could not be generated.');
+            \Log::error($e->getMessage());
+        }
+
+        if(!$csvFile || !file_exists($csvFile)){
+            // Return a simple HTML error page for <a> link downloads
+            return response(
+                '<html><head><title>Export Error</title></head><body style="font-family:sans-serif;text-align:center;padding:3em;"><h2 style="color:#e53e3e;">Export Failed</h2><p>Sorry, the CSV file could not be generated. Please try again later.</p><a href="/" style="color:#3182ce;text-decoration:underline;">&larr; Back to Home</a></body></html>',
+                500,
+                ['Content-Type' => 'text/html']
+            );
+        }
+        return response()->download($csvFile)->deleteFileAfterSend(true);
+    }
+
+    protected function generateWordsCsv()
+    {       
+        $words = Word::all();
+
+        $now = Carbon::now()->format('m-d-Y');
+        $filename = '/app/words-' . $now . '.csv';
+
+        $file = fopen(storage_path($filename), 'w+');
+        
+        $headersArray = ['Word', 'Translations'];
+        fputcsv($file, $headersArray);
+        foreach($words as $word){
+            if($word){
+                $translations = $word->translations->pluck('translation')->toArray();
+                $translationString = implode(", ", $translations);
+                if($translationString == ''){
+                    $translationString = '-';
+                }
+
+                $dataArray = [$word->word, $translationString];
+
+                fputcsv($file, $dataArray);
+            }
+        }
+        fclose($file);
+        return storage_path($filename);
     }
 }

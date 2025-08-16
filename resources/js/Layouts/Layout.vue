@@ -20,9 +20,14 @@
                     </svg>
                 </button>
                 <nav :class="['lg:flex', isMenuOpen ? 'block' : 'hidden']" class="absolute lg:static top-12 left-0 bg-blue-800 w-full lg:w-auto lg:bg-transparent lg:space-x-4 space-y-2 lg:space-y-0">
-                    <InertiaLink v-for="(link, index) in links" :key="link.href" :href="link.href" class="block lg:inline-block text-sm text-blue-300 hover:text-white px-4 py-2 lg:p-0" :method="link.href == '/logout' ? 'POST' : 'GET'"  @click="linkClicked(link)">
-                        {{ link.label }}
-                    </InertiaLink>
+                    <template v-for="(link, index) in links" :key="link.href">
+                        <InertiaLink v-if="link.href !== '/export'" :href="link.href" class="block lg:inline-block text-sm text-blue-300 hover:text-white px-4 py-2 lg:p-0" :method="link.href == '/logout' ? 'POST' : 'GET'"  @click="linkClicked(link)">
+                            {{ link.label }}
+                        </InertiaLink>
+                        <a v-else :href="link.href" class="block lg:inline-block text-sm text-blue-300 hover:text-white px-4 py-2 lg:p-0" @click="linkClicked(link)">
+                            {{ link.label }}
+                        </a>
+                    </template>
                 </nav>
             </div>
         </header>
@@ -83,6 +88,7 @@
             linkData.push({ href: '/daily-dose', label: 'Daily Dose' })
             linkData.push({ href: '/my-tests', label: 'My Tests' })
             linkData.push({ href: '/tags', label: 'Tags' })
+            linkData.push({ href: '/export', label: 'Export' })
             linkData.push({href: '/logout', label: 'Logout'})
         } else{
             linkData.push({href: '/login', label: 'Login'})
@@ -117,6 +123,8 @@
 
         isMenuOpen.value = false
     }
+
+
 </script>
 
 <style scoped>

@@ -3,7 +3,10 @@
         <div class="min-h-screen bg-gray-100 p-6">
             <div class="max-w-7xl mx-auto w-full">
                 <header class="text-center mb-10">
-                    <h1 class="text-4xl font-bold text-gray-800">Parole</h1>
+                    <h1 class="text-4xl font-bold text-gray-800">
+                        Parole 
+                        <span v-if="totalWordCount" class="text-base font-normal align-top ml-1">({{ totalWordCount }})</span>
+                    </h1>
                     <p class="text-gray-600">Ho Bisogno Di Imparare L'Italiano! 🤌</p>
                 </header>
 
@@ -66,6 +69,7 @@
     // Props
     const props = defineProps({
         wordsList : {type: Object, default: {}},
+        totalWordCount: {type: Number, default: null},
         isSearching: {type: Boolean, default: false},
         searchData: {type: Object, default: {}},
     })
