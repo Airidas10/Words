@@ -1,8 +1,9 @@
 <template>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white rounded-lg shadow-md flex flex-col items-center">
         <div class="flex items-center justify-center w-full mb-6">
-            <h1 class="text-3xl font-semibold text-gray-800">{{ word.word }}</h1>
-            <InertiaLink v-if="isRandomPage" href="/random" class="text-blue-500 text-sm ml-2 hover:underline">Regenerate</InertiaLink>
+            <div class="flex flex-col sm:flex-row items-center justify-center w-full gap-2">
+                <h1 class="text-3xl font-semibold text-gray-800 text-center break-words">{{ word.word }}</h1>
+            </div>
 
         </div>
         <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm mb-4" @click="toggleTranslationVisibility">
@@ -40,7 +41,11 @@
         </div>
 
         <div class="mt-6 w-full text-center">
-            <a class="text-blue-600 hover:text-blue-800 text-sm font-medium" href="#" onclick="history.back()">&larr; Go Back</a>
+            <div v-if="isRandomPage" class="sm:ml-4 mt-2 sm:mt-0">
+                <InertiaLink href="/random" class="bg-blue-800 hover:bg-blue-900 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg transition-colors duration-150" @click="nextWordClicked">
+                    Next
+                </InertiaLink>
+            </div>
         </div>
     </div>
 </template>
@@ -101,6 +106,11 @@
     const translationHeader = computed(() => {
         return props.word?.translations?.length > 1 ? 'Translations:' : 'Translation:'
     })
+
+    function nextWordClicked(){
+        // If going to the next word, set show translation to false
+        store.commit('setShowTranslation', false)
+    }
 
 </script>
 
