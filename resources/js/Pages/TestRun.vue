@@ -1,7 +1,10 @@
 <template>
     <div class="max-w-4xl mx-auto space-y-4 px-4">
-        <div v-for="(item, index) in testData" :key="index" class="flex items-center justify-between">
-            <label :for="'question-' + index" class="text-base font-medium text-gray-700 w-1/3">
+        <div v-for="(item, index) in testData" :key="index" class="flex flex-col sm:flex-row items-start justify-between">
+            <label
+                :for="'question-' + index"
+                class="block text-base font-medium text-gray-700 min-w-0 break-words w-full sm:w-1/3 pb-2 sm:pb-0 pr-0 sm:pr-4"
+            >
                 {{ item.question }}
                 <span v-if="item.help" class="ml-2 text-blue-500 cursor-pointer" @click.prevent.stop="togglePopover(item)">
                      ℹ️ 
@@ -15,7 +18,7 @@
                 </button>
             </div>
 
-            <div class="w-2/3 flex items-center space-x-3">
+            <div class="w-full sm:w-2/3 flex items-center space-x-3">
                 <input
                     :id="'question-' + index"
                     autocomplete="off"
