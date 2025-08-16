@@ -8,6 +8,7 @@ export default defineConfig({
             host: 'localhost',
         },
         port: 5175,
+        cors: true,
     }, 
     plugins: [
         vue({
