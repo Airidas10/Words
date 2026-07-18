@@ -1,6 +1,6 @@
 services:
     laravel.test:
-        hostname: bball.wip
+        hostname: words.wip
         build:
             context: ./vendor/laravel/sail/runtimes/8.4
             dockerfile: Dockerfile
