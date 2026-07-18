@@ -1,0 +1,10 @@
+---
+description: 
+globs: *.php
+alwaysApply: false
+---
+
+This is a Laravel project, use the composer.lock file to find the appropriate version of Laravel and PHP to inform your decsions.
+Do not make php code suggestions that are not compatible.
+Remember when you are attempting to run any tests or checks, that this is a Laravel Sail environment, do not attempt to run php or artisan on the host machine.
+Attempt to maintain consistent code style.

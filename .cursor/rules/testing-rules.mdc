@@ -1,0 +1,8 @@
+---
+description: 
+alwaysApply: true
+---
+
+This project uses Pest for testing.
+All tests are stored under the tests/ directory.
+Attempt to maintain consistent test style

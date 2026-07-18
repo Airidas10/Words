@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+This project uses Vue3, InertiaJS and Vue Router.
+- Use Vue3 Composition API patterns
+- Use Vue Router syntax
+- Avoid Vue2 Options API patterns
+- Use <script setup> syntax for components
+Do not make javascript code suggestions that are not compatible. Attempt to maintain consistent code style.
