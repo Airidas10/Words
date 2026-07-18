@@ -20,6 +20,7 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.0.0",
+        "playwright": "^1.61.1",
         "vuex": "^4.0.2"
     }
 }

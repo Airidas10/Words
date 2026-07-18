@@ -25,6 +25,7 @@ services:
             - sail
         depends_on:
             - mariadb
+            - mariadb-test
     mariadb:
         image: 'mariadb:10'
         ports:
@@ -45,6 +46,26 @@ services:
                 - mysqladmin
                 - ping
                 - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+    mariadb-test:
+        image: 'mariadb:10'
+        environment:
+            MYSQL_ROOT_PASSWORD: 'password'
+            MYSQL_DATABASE: 'testing'
+            MYSQL_USER: 'sail'
+            MYSQL_PASSWORD: 'password'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        tmpfs:
+            - /var/lib/mysql
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-ppassword'
             retries: 3
             timeout: 5s
 networks:
