@@ -46,7 +46,11 @@ it('rejects creating a word with empty required fields', function () {
         ->click('Save');
 
     $page->assertPathIs('/words/create')
-        ->assertSee('Create New Word');
+        ->assertSee('Create New Word')
+        ->assertSee('The word field is required.')
+        ->assertVisible('@word-error')
+        ->assertSee('The translation field is required.')
+        ->assertVisible('@translation-error-0');
 
     $this->assertDatabaseCount('words', 0);
 });
@@ -62,7 +66,9 @@ it('rejects creating a duplicate word', function () {
         ->click('Save');
 
     $page->assertPathIs('/words/create')
-        ->assertSee('Create New Word');
+        ->assertSee('Create New Word')
+        ->assertSee('This word (Ciao) already exists!')
+        ->assertVisible('@form-error');
 
     $this->assertDatabaseCount('words', 1);
     $this->assertDatabaseHas('words', [

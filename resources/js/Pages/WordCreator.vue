@@ -2,15 +2,30 @@
     <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-8">
         <h1 class="text-3xl font-semibold text-gray-800 mb-8 text-center">{{ mode == 'create' ? 'Create New Word' : 'Edit Word' }}</h1>
         <form>
+            <div
+                v-if="formError()"
+                class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-red-700"
+                data-testid="form-error"
+            >
+                {{ formError() }}
+            </div>
+
             <div class="mb-6">
                 <label for="word" class="block text-base font-medium text-gray-700 mb-2">Word</label>
                 <input
                     id="word"
                     type="text"
                     v-model="wordData.word"
-                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                    :class="[
+                        'w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400',
+                        fieldError('word') ? 'border-red-500' : 'border-gray-300',
+                    ]"
                     placeholder="Enter the word"
+                    @input="clearErrors"
                 />
+                <p v-if="fieldError('word')" class="mt-2 text-sm text-red-600" data-testid="word-error">
+                    {{ fieldError('word') }}
+                </p>
             </div>
 
             <div class="mb-6">
@@ -25,8 +40,12 @@
                             :id="'translation-' + translation.id"
                             type="text"
                             v-model="translation.translation"
-                            class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                            :class="[
+                                'w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400',
+                                fieldError(`translations.${index}.translation`) ? 'border-red-500' : 'border-gray-300',
+                            ]"
                             placeholder="Enter the translation"
+                            @input="clearErrors"
                         />
 
                         <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-2">
@@ -40,6 +59,14 @@
                         </div>
                     </div>
 
+                    <p
+                        v-if="fieldError(`translations.${index}.translation`)"
+                        class="mt-2 text-sm text-red-600"
+                        :data-testid="`translation-error-${index}`"
+                    >
+                        {{ fieldError(`translations.${index}.translation`) }}
+                    </p>
+
                     <div v-if="translationHasHelpInput(translation)" class="relative mt-2 ml-5">
                         <input
                             type="text"
@@ -52,6 +79,9 @@
                         </span>
                     </div>
                 </div>
+                <p v-if="fieldError('translations')" class="mt-2 text-sm text-red-600" data-testid="translations-error">
+                    {{ fieldError('translations') }}
+                </p>
             </div>
 
             <div class="mb-6">
@@ -135,10 +165,12 @@
     import { useStore } from 'vuex'
     // Reusables
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
+    import { useFormErrors } from '../Reusables/FormErrors'
 
     const store = useStore()
 
     const { axiosRequest } = useAxiosRequest()
+    const { clearErrors, setErrors, fieldError, formError, applyErrorResponse } = useFormErrors()
 
     // Props
     const props = defineProps({
@@ -254,18 +286,48 @@
         return store.state.wordEditUrl ? store.state.wordEditUrl : '/'
     })
 
+    function validateWordData(){
+        const nextErrors = {}
+
+        if(! String(wordData.word ?? '').trim()){
+            nextErrors.word = ['The word field is required.']
+        }
+
+        if(! Array.isArray(translations.value) || translations.value.length === 0){
+            nextErrors.translations = ['The translations field is required.']
+        } else{
+            translations.value.forEach((translation, index) => {
+                if(! String(translation?.translation ?? '').trim()){
+                    nextErrors[`translations.${index}.translation`] = ['The translation field is required.']
+                }
+            })
+        }
+
+        return nextErrors
+    }
+
     function saveButtonClicked(){
         let endpoint = mode.value == 'create' ? '/api/words/create' : '/api/words/update/' + props.word.id
         let method = mode.value == 'create' ? 'POST' : 'PUT'
         let apiData = wordData
         apiData.translations = translations.value
 
+        clearErrors()
+
+        const clientErrors = validateWordData()
+        if(Object.keys(clientErrors).length > 0){
+            setErrors(clientErrors)
+            return
+        }
+
         axiosRequest(endpoint, apiData, method, true).then((response) => {
             if(response.data.status == 'success'){
                 router.visit(wordEditUrl.value)
             } else{
-                alert(response.data.msg)
+                applyErrorResponse({ data: response.data })
             }
+        }).catch((errorResponse) => {
+            applyErrorResponse(errorResponse)
         })
     }
 
@@ -280,13 +342,16 @@
         let method = 'DELETE'
         let apiData = {}
 
-        axiosRequest(endpoint, apiData, method).then((response) => {
-            console.log("response", response)
-            if(response.status == 'success'){
+        clearErrors()
+
+        axiosRequest(endpoint, apiData, method, true).then((response) => {
+            if(response.data.status == 'success'){
                 router.visit(wordEditUrl.value)
             } else{
-                alert(response.msg)
+                applyErrorResponse({ data: response.data })
             }
+        }).catch((errorResponse) => {
+            applyErrorResponse(errorResponse)
         })
     }
 </script>

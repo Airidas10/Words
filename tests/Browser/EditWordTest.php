@@ -67,7 +67,11 @@ it('rejects editing a word with empty required fields', function () {
         ->click('Save');
 
     $page->assertPathIs('/words/edit/'.$word->id)
-        ->assertSee('Edit Word');
+        ->assertSee('Edit Word')
+        ->assertSee('The word field is required.')
+        ->assertVisible('@word-error')
+        ->assertSee('The translation field is required.')
+        ->assertVisible('@translation-error-0');
 
     $this->assertDatabaseHas('words', [
         'id' => $word->id,

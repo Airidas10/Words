@@ -72,7 +72,9 @@ it('rejects editing a tag with an empty name', function () {
         ->click('Save');
 
     $page->assertPathIs('/tags/edit/'.$tag->id)
-        ->assertSee('Edit Tag');
+        ->assertSee('Edit Tag')
+        ->assertSee('The tag field is required.')
+        ->assertVisible('@tag-error');
 
     $this->assertDatabaseHas('tags', [
         'id' => $tag->id,

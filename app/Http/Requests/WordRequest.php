@@ -36,4 +36,11 @@ class WordRequest extends FormRequest
 
         return $rules;
     }
+
+    public function attributes(): array
+    {
+        return [
+            'translations.*.translation' => 'translation',
+        ];
+    }
 }

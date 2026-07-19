@@ -46,7 +46,9 @@ it('rejects creating a tag with an empty name', function () {
         ->click('Save');
 
     $page->assertPathIs('/tags/create')
-        ->assertSee('Create New Tag');
+        ->assertSee('Create New Tag')
+        ->assertSee('The tag field is required.')
+        ->assertVisible('@tag-error');
 
     $this->assertDatabaseCount('tags', 0);
 });
@@ -62,7 +64,9 @@ it('rejects creating a duplicate tag', function () {
         ->click('Save');
 
     $page->assertPathIs('/tags/create')
-        ->assertSee('Create New Tag');
+        ->assertSee('Create New Tag')
+        ->assertSee('The tag has already been taken.')
+        ->assertVisible('@tag-error');
 
     $this->assertDatabaseCount('tags', 1);
     $this->assertDatabaseHas('tags', [

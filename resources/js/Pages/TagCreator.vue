@@ -2,15 +2,30 @@
     <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-8">
         <h1 class="text-3xl font-semibold text-gray-800 mb-8 text-center">{{ mode == 'create' ? 'Create New Tag' : 'Edit Tag' }}</h1>
         <form>
+            <div
+                v-if="formError()"
+                class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-red-700"
+                data-testid="form-error"
+            >
+                {{ formError() }}
+            </div>
+
             <div class="mb-6">
                 <label for="tag" class="block text-base font-medium text-gray-700 mb-2">Tag</label>
                 <input
                     id="tag"
                     type="text"
                     v-model="tagData.tag"
-                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                    :class="[
+                        'w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400',
+                        fieldError('tag') ? 'border-red-500' : 'border-gray-300',
+                    ]"
                     placeholder="Enter a tag name"
+                    @input="clearErrors"
                 />
+                <p v-if="fieldError('tag')" class="mt-2 text-sm text-red-600" data-testid="tag-error">
+                    {{ fieldError('tag') }}
+                </p>
             </div>
 
             <div class="flex items-center justify-between gap-4">
@@ -55,8 +70,10 @@
     import { Link as InertiaLink, router } from '@inertiajs/vue3'
     // Reusables
     import { useAxiosRequest } from '../Reusables/AxiosRequest'
+    import { useFormErrors } from '../Reusables/FormErrors'
 
     const { axiosRequest } = useAxiosRequest()
+    const { clearErrors, setErrors, fieldError, formError, applyErrorResponse } = useFormErrors()
 
     // Props
     const props = defineProps({
@@ -85,18 +102,37 @@
         tagData.tag = props.tag.tag
     }
 
+    function validateTagData(){
+        const nextErrors = {}
+
+        if(! String(tagData.tag ?? '').trim()){
+            nextErrors.tag = ['The tag field is required.']
+        }
+
+        return nextErrors
+    }
+
     function saveButtonClicked(){
         let endpoint = mode.value == 'create' ? '/api/tags/create' : '/api/tags/update/' + props.tag.id
         let method = mode.value == 'create' ? 'POST' : 'PUT'
         let apiData = tagData
 
-        axiosRequest(endpoint, apiData, method).then((response) => {
-            console.log("response", response)
-            if(response.status == 'success'){
+        clearErrors()
+
+        const clientErrors = validateTagData()
+        if(Object.keys(clientErrors).length > 0){
+            setErrors(clientErrors)
+            return
+        }
+
+        axiosRequest(endpoint, apiData, method, true).then((response) => {
+            if(response.data.status == 'success'){
                 router.visit('/tags')
             } else{
-                alert(response.msg)
+                applyErrorResponse({ data: response.data })
             }
+        }).catch((errorResponse) => {
+            applyErrorResponse(errorResponse)
         })
     }
 
@@ -111,15 +147,16 @@
         let method = 'DELETE'
         let apiData = {}
 
-        axiosRequest(endpoint, apiData, method).then((response) => {
-            console.log("response", response)
-            if(response.status == 'success'){
+        clearErrors()
+
+        axiosRequest(endpoint, apiData, method, true).then((response) => {
+            if(response.data.status == 'success'){
                 router.visit('/tags')
             } else{
-                alert(response.msg)
+                applyErrorResponse({ data: response.data })
             }
+        }).catch((errorResponse) => {
+            applyErrorResponse(errorResponse)
         })
     }
 </script>
-
-
