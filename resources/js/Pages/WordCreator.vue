@@ -74,7 +74,12 @@
                         </span>
                         <span v-if="wordData.tags?.length == 0" class="text-gray-600 text-sm">No tags yet</span>
                     </div>
-                    <button type="button" class="bg-gray-200 text-gray-600 p-2 rounded-full shadow hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-400" @click="openTagModal">
+                    <button
+                        type="button"
+                        data-testid="open-tag-modal"
+                        class="bg-gray-200 text-gray-600 p-2 rounded-full shadow hover:bg-gray-300 focus:outline-none focus:ring focus:ring-gray-400"
+                        @click="openTagModal"
+                    >
                         +
                     </button>
                 </div>

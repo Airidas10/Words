@@ -6,12 +6,12 @@
 
 
         <div v-if="totalTests !== null" class="flex flex-col sm:flex-row justify-center items-center gap-6 mb-6">
-            <div class="bg-blue-100 text-blue-800 px-6 py-4 rounded-lg shadow flex flex-col items-center">
-                <span class="text-3xl font-bold">{{ totalTests }}</span>
+            <div class="bg-blue-100 text-blue-800 px-6 py-4 rounded-lg shadow flex flex-col items-center" data-testid="total-tests">
+                <span class="text-3xl font-bold" data-testid="total-tests-value">{{ totalTests }}</span>
                 <span class="text-sm font-medium mt-1">Total Tests</span>
             </div>
-            <div class="bg-green-100 text-green-800 px-6 py-4 rounded-lg shadow flex flex-col items-center">
-                <span class="text-3xl font-bold">
+            <div class="bg-green-100 text-green-800 px-6 py-4 rounded-lg shadow flex flex-col items-center" data-testid="average-score">
+                <span class="text-3xl font-bold" data-testid="average-score-value">
                     {{ avgScoreDisplay }}
                 </span>
                 <span class="text-sm font-medium mt-1">Average Score</span>
@@ -31,10 +31,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(test, index) in tests" :key="index" class="hover:bg-gray-100 cursor-pointer" @click.prevent.stop="handleRowClick(test)">
+                    <tr v-for="(test, index) in tests" :key="index" class="hover:bg-gray-100 cursor-pointer" :data-testid="`test-row-${test.id}`"
+                        @click.prevent.stop="handleRowClick(test)">
                         <td class="px-4 py-2">{{ test.created_at }}</td>
                         <td class="px-4 py-2">{{ test.updated_at }}</td>
-                        <td class="px-4 py-2">{{ getScore(test) }}</td>
+                        <td class="px-4 py-2" :data-testid="`test-score-${test.id}`">{{ getScore(test) }}</td>
                         <td class="px-4 py-2 relative">
                             <InertiaLink @click.prevent.stop :href="`/runs/${test.id}`" class="absolute inset-y-0 left-0 right-0 flex items-center justify-center text-sm text-blue-600 hover:underline">
                                 See more
