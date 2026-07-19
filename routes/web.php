@@ -25,6 +25,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/', [WordController::class, 'index'])->name('words.index');
-Route::get('/words/{word}', [WordController::class, 'show'])->name('words.show');
+Route::get('/words/{id}', [WordController::class, 'show'])->name('words.show');
 Route::get('/random', [WordController::class, 'getRandomWord'])->name('words.random');
 Route::get('/search/{type}/{searchString?}', [SearchController::class, 'search'])->name('words.search');

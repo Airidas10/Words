@@ -31,8 +31,8 @@ class Test extends Model
         $query->whereNotNull('score');
     }
 
-    public function users(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Word::class);
+        return $this->belongsTo(User::class);
     }
 }

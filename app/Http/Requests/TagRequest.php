@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class TagRequest extends FormRequest
 {
@@ -23,9 +24,14 @@ class TagRequest extends FormRequest
     {
         $rules = [];
 
-        if(!in_array($this->method(), ['DELETE'])){
+        if (!in_array($this->method(), ['DELETE'])){
             $rules = [
-                'tag' => 'required|string|max:191',
+                'tag' => [
+                    'required',
+                    'string',
+                    'max:191',
+                    Rule::unique('tags', 'tag')->ignore($this->route('id')),
+                ],
             ];
         }
 

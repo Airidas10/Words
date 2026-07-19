@@ -62,6 +62,6 @@ it('shows an empty state when a tag has no related words', function () {
         ->navigate('/tags/'.$tag->id)
         ->assertPathIs('/tags/'.$tag->id)
         ->assertSee('Unused')
-        ->assertSee('No tags available.')
+        ->assertSee('No related words.')
         ->assertDontSee('Related Words:');
 });

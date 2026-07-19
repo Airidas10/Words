@@ -20,7 +20,7 @@
         </div>
 
         <div v-else class="mt-6 w-full text-center">
-            <p class="text-gray-600">No tags available.</p>
+            <p class="text-gray-600">No related words.</p>
         </div>
     </div>
 </template>

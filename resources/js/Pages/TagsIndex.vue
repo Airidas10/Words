@@ -58,6 +58,6 @@
     })
 
     function handleRowClick(tag){
-        router.visit(/tags/ + tag.id)
+        router.visit('/tags/' + tag.id)
     }
 </script>
