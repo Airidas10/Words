@@ -25,6 +25,16 @@
             <div class="flex items-center justify-center w-full mb-6">
                 <div class="flex flex-col sm:flex-row items-center justify-center w-full gap-2">
                     <h1 class="text-3xl font-semibold text-gray-800 text-center break-words">{{ word.word }}</h1>
+                    <button
+                        v-if="canSpeak"
+                        type="button"
+                        data-testid="speak-word"
+                        class="inline-flex items-center justify-center min-h-9 min-w-9 text-xl rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                        title="Listen in Italian"
+                        @click="speakWord"
+                    >
+                        🔊
+                    </button>
                     <StruggleToggle
                         v-if="user"
                         :word-id="word.id"
@@ -200,7 +210,39 @@
         return props.word?.translations?.length > 1 ? 'Translations:' : 'Translation:'
     })
 
+    const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window
+
+    function italianVoice() {
+        return window.speechSynthesis
+            .getVoices()
+            .find((voice) => voice.lang === 'it-IT' || voice.lang.startsWith('it'))
+            ?? null
+    }
+
+    function speakWord() {
+        if (!canSpeak || !props.word?.word) {
+            return
+        }
+
+        window.speechSynthesis.cancel()
+
+        const utterance = new SpeechSynthesisUtterance(props.word.word)
+        utterance.lang = 'it-IT'
+        utterance.rate = 0.6
+        utterance.pitch = 0.7
+
+        const voice = italianVoice()
+        if (voice) {
+            utterance.voice = voice
+        }
+
+        window.speechSynthesis.speak(utterance)
+    }
+
     function nextWordClicked(){
+        if (canSpeak) {
+            window.speechSynthesis.cancel()
+        }
         store.commit('setShowTranslation', false)
     }
 
