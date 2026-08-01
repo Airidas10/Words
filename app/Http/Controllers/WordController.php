@@ -13,12 +13,13 @@ use Auth;
 use App\Models\Word;
 use App\Models\Tag;
 use App\Models\Translation;
+use App\Services\WordStatsService;
 
 use App\Http\Requests\WordRequest;
 
 class WordController extends Controller
 {
-    public function index()
+    public function index(WordStatsService $wordStats)
     {
         $wordsPerPage = config('words.words_per_page');
         $words = Word::with('tags', 'translations')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
@@ -27,15 +28,20 @@ class WordController extends Controller
         return Inertia::render('WordIndex', [
             'wordsList' => $words,
             'totalWordCount' => $wordCount,
+            'wordStats' => $wordStats->forWordIdsIfAuthenticated(
+                Auth::user(),
+                $words->getCollection()->pluck('id')->all(),
+            ),
         ]);
     }
 
-    public function show($id)
+    public function show($id, WordStatsService $wordStats)
     {
         $word = Word::with('tags', 'translations')->findOrFail($id);
 
         return Inertia::render('Word', [
             'word' => $word,
+            'wordStats' => $wordStats->forWordIfAuthenticated(Auth::user(), (int) $word->id),
         ]);
     }
 
@@ -152,7 +158,7 @@ class WordController extends Controller
         return $response;
     }
 
-    public function getRandomWord(Request $request)
+    public function getRandomWord(Request $request, WordStatsService $wordStats)
     {
         $word = Word::with('tags', 'translations')->inRandomOrder()->first();
 
@@ -160,7 +166,10 @@ class WordController extends Controller
             return ['status' => 'success', 'msg' => 'Data fetched successfully', 'data' => $word];
         } else{
             return Inertia::render('Word', [
-                'word' => $word
+                'word' => $word,
+                'wordStats' => $word
+                    ? $wordStats->forWordIfAuthenticated(Auth::user(), (int) $word->id)
+                    : null,
             ]);
         }  
     }

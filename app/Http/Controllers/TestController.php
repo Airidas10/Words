@@ -12,6 +12,7 @@ use \Carbon\Carbon;
 use App\Models\Word;
 use App\Models\Translation;
 use App\Models\Test;
+use App\Services\WordStatsService;
 
 class TestController extends Controller
 {
@@ -132,6 +133,11 @@ class TestController extends Controller
 
             $response = ['status' => 'success', 'msg' => 'Test was submitted!', 'data' => $testRun];
         }, 5);
+
+        // Invalidate cache, so it's rebuilt on the next load.
+        if ($response['status'] === 'success' && Auth::user()) {
+            app(WordStatsService::class)->forget(Auth::user());
+        }
 
         return $response;
     }

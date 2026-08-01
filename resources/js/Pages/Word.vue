@@ -40,6 +40,8 @@
             <p class="text-gray-600">Description is hidden.</p> <span class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm mb-4" @click="toggleDescription">{{ showDescription ? 'Hide' : 'Show' }}</span>
         </div>
 
+        <WordOverallStats :stats="wordStats" :word-id="word.id" variant="detailed" />
+
         <div class="mt-6 w-full text-center">
             <div v-if="isRandomPage" class="sm:ml-4 mt-2 sm:mt-0">
                 <InertiaLink href="/random" class="bg-blue-800 hover:bg-blue-900 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg transition-colors duration-150" @click="nextWordClicked">
@@ -62,13 +64,15 @@
     // Libraries
     import { Link as InertiaLink, usePage } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
+    import WordOverallStats from '../Components/WordOverallStats.vue'
 
     const store = useStore()
     const { url } = usePage()
 
     // Props
     const props = defineProps({
-        word: Object
+        word: Object,
+        wordStats: { type: Object, default: null },
     })
 
     const isRandomPage = computed(() => {

@@ -13,6 +13,8 @@
             <p v-for="translation in word.translations" :key="translation.id" class="text-gray-600">{{ showTranslation ? translation.translation : '*****' }}</p>
         </div>
 
+        <WordOverallStats :stats="stats" :word-id="word.id" />
+
         <div v-if="word.description" class="relative flex-grow">
             <button @click.prevent.stop="togglePopover" class="text-blue-500 text-sm underline mt-1">
                 ⚠️
@@ -49,11 +51,13 @@
     // Libraries
     import { Link as InertiaLink } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
+    import WordOverallStats from './WordOverallStats.vue'
     
     const store = useStore()
 
     const props = defineProps({
-        word: {type: Object},
+        word: { type: Object },
+        stats: { type: Object, default: null },
     })
 
     const emits = defineEmits(['tagClick'])

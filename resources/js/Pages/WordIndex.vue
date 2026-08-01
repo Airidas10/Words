@@ -28,9 +28,9 @@
                 </div>
 
                 <div v-if="words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-full">
-                    <div v-for="word in words">
+                    <div v-for="word in words" :key="word.id">
                         <InertiaLink :href="`/words/${word.id}`">
-                            <word-card :word="word" @tagClick="handleTagClick"></word-card>
+                            <word-card :word="word" :stats="statsFor(word.id)" @tagClick="handleTagClick"></word-card>
                         </InertiaLink>
                     </div>
                 </div>
@@ -68,10 +68,11 @@
 
     // Props
     const props = defineProps({
-        wordsList : {type: Object, default: {}},
-        totalWordCount: {type: Number, default: null},
-        isSearching: {type: Boolean, default: false},
-        searchData: {type: Object, default: {}},
+        wordsList: { type: Object, default: {} },
+        totalWordCount: { type: Number, default: null },
+        isSearching: { type: Boolean, default: false },
+        searchData: { type: Object, default: {} },
+        wordStats: { type: Object, default: null },
     })
 
     const words = ref([])
@@ -82,6 +83,14 @@
     )
 
     const user = computed(() => store.state.user)
+
+    function statsFor(wordId) {
+        if (!props.wordStats) {
+            return null
+        }
+
+        return props.wordStats[wordId] ?? props.wordStats[String(wordId)] ?? null
+    }
 
     function handleTagClick(data){
         let tagObj = data.tag

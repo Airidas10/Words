@@ -7,11 +7,14 @@ use Illuminate\Http\Request;
 use stdClass;
 
 use Inertia\Inertia;
+use Auth;
+
 use App\Models\Word;
+use App\Services\WordStatsService;
 
 class SearchController extends Controller
 {
-    public function search(Request $request, $type, $searchString=null)
+    public function search(Request $request, $type, $searchString = null, WordStatsService $wordStats)
     {
         $searchData = new stdClass();
         $searchData->type = $type;
@@ -21,7 +24,7 @@ class SearchController extends Controller
 
         switch ($type) {
             case 'global':
-                $words = Word::with('tags', 'translations')->where('word', 'like', '%' . $searchString . '%')->orWhereHas('translations', function($q) use($searchString){
+                $words = Word::with('tags', 'translations')->where('word', 'like', '%' . $searchString . '%')->orWhereHas('translations', function ($q) use ($searchString) {
                     $q->where('translation', 'like', '%' . $searchString . '%');
                 })->orderBy('created_at', 'desc')->paginate($wordsPerPage);
 
@@ -29,11 +32,14 @@ class SearchController extends Controller
                     'wordsList' => $words,
                     'isSearching' => true,
                     'searchData' => $searchData,
+                    'wordStats' => $wordStats->forWordIdsIfAuthenticated(
+                        Auth::user(),
+                        $words->getCollection()->pluck('id')->all(),
+                    ),
                 ]);
-                break;
 
             case 'tag':
-                $words = Word::with('tags', 'translations')->whereHas('tags', function($q) use($searchString){
+                $words = Word::with('tags', 'translations')->whereHas('tags', function ($q) use ($searchString) {
                     $q->where('tag', $searchString);
                 })->orderBy('created_at', 'desc')->paginate($wordsPerPage);
 
@@ -41,14 +47,16 @@ class SearchController extends Controller
                     'wordsList' => $words,
                     'isSearching' => true,
                     'searchData' => $searchData,
+                    'wordStats' => $wordStats->forWordIdsIfAuthenticated(
+                        Auth::user(),
+                        $words->getCollection()->pluck('id')->all(),
+                    ),
                 ]);
-                break;
-            
+
             default:
                 return Inertia::render('Error', [
                     'message' => 'Something went wrong. Please try again.',
                 ]);
-                break;
         }
     }
 }

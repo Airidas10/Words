@@ -26,6 +26,23 @@ services:
         depends_on:
             - mariadb
             - mariadb-test
+            - redis
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6380}:6379'
+        volumes:
+            - 'sailredis:/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+    
     mariadb:
         image: 'mariadb:10'
         ports:
@@ -73,4 +90,6 @@ networks:
         driver: bridge
 volumes:
     sailmariadb:
+        driver: local
+    sailredis:
         driver: local
