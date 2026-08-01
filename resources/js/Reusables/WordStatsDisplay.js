@@ -23,3 +23,12 @@ export function accuracyColorClass(accuracy) {
 
     return 'text-green-600'
 }
+
+export function statsForWord(wordStats, wordId) {
+    if (!wordStats) {
+        return null
+    }
+
+    // Inertia JSON object keys are always strings.
+    return wordStats[String(wordId)] ?? null
+}

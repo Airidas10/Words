@@ -30,7 +30,30 @@ it('lists tags with word counts for an authenticated user', function () {
 it('shows a tag with its related words', function () {
     $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
     $tag = $word->tags->first();
-    Sanctum::actingAs(User::factory()->create());
+    $user = User::factory()->create();
+
+    createFinishedTestWithQuestions($user, [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+        '2' => [
+            'id' => $word->id,
+            'type' => 't',
+            'question' => 'Hello',
+            'answer' => 'wrong',
+            'correct' => false,
+            'correctAnswer' => 'ciao',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    Sanctum::actingAs($user);
 
     $this->get('/tags/'.$tag->id)
         ->assertOk()
@@ -41,6 +64,16 @@ it('shows a tag with its related words', function () {
             ->has('tag.words', 1)
             ->where('tag.words.0.word', 'Ciao')
             ->where('tag.words.0.translations.0.translation', 'Hello')
+            ->where('wordStats', function ($wordStats) use ($word) {
+                // Inertia JSON turns map keys into strings on the wire.
+                expect($wordStats[(string) $word->id]['overall'])->toMatchArray([
+                    'attempts' => 2,
+                    'correct' => 1,
+                    'incorrect' => 1,
+                ]);
+
+                return true;
+            })
         );
 });
 

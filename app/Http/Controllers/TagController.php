@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use Inertia\Inertia;
+use Auth;
+
 use App\Models\Tag;
+use App\Services\WordStatsService;
 
 use App\Http\Requests\TagRequest;
 
@@ -20,12 +23,16 @@ class TagController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($id, WordStatsService $wordStats)
     {
-        $tag = Tag::with('words.translations')->findOrFail($id);
+        $tag = Tag::with(['words.translations', 'words.tags'])->findOrFail($id);
 
         return Inertia::render('Tag', [
             'tag' => $tag,
+            'wordStats' => $wordStats->forWordIdsIfAuthenticated(
+                Auth::user(),
+                $tag->words->pluck('id')->all(),
+            ),
         ]);
     }
 

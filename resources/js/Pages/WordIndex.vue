@@ -30,7 +30,7 @@
                 <div v-if="words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-full">
                     <div v-for="word in words" :key="word.id">
                         <InertiaLink :href="`/words/${word.id}`">
-                            <word-card :word="word" :stats="statsFor(word.id)" @tagClick="handleTagClick"></word-card>
+                            <word-card :word="word" :stats="statsForWord(wordStats, word.id)" @tagClick="handleTagClick"></word-card>
                         </InertiaLink>
                     </div>
                 </div>
@@ -62,6 +62,7 @@
     // Components
     import WordCard from '../Components/WordCard.vue'
     import Pagination from '../Components/Pagination.vue'
+    import { statsForWord } from '../Reusables/wordStatsDisplay'
 
     const { axiosRequest } = useAxiosRequest()
     const store = useStore()
@@ -83,15 +84,6 @@
     )
 
     const user = computed(() => store.state.user)
-
-    function statsFor(wordId) {
-        if (!props.wordStats) {
-            return null
-        }
-
-        // Inertia JSON object keys are always strings.
-        return props.wordStats[String(wordId)] ?? null
-    }
 
     function handleTagClick(data){
         let tagObj = data.tag
