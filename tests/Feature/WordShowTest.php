@@ -70,3 +70,117 @@ it('shows a word with no tags', function () {
 it('returns not found when viewing a missing word', function () {
     $this->get('/words/999999')->assertNotFound();
 });
+
+it('passes null wordStats for guests', function () {
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    $this->get('/words/'.$word->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Word')
+            ->where('wordStats', null)
+        );
+});
+
+it('passes null wordStats when the authenticated user has no history for the word', function () {
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    $this->actingAs(User::factory()->create())
+        ->get('/words/'.$word->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Word')
+            ->where('wordStats', null)
+        );
+});
+
+it('passes overall wordStats for an authenticated user with history', function () {
+    $user = User::factory()->create();
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    createFinishedTestWithQuestions($user, [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+        '2' => [
+            'id' => $word->id,
+            'type' => 't',
+            'question' => 'Hello',
+            'answer' => 'wrong',
+            'correct' => false,
+            'correctAnswer' => 'ciao',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    $this->actingAs($user)
+        ->get('/words/'.$word->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Word')
+            ->where('wordStats.overall.attempts', 2)
+            ->where('wordStats.overall.correct', 1)
+            ->where('wordStats.overall.incorrect', 1)
+            ->where('wordStats.overall.accuracy', 50)
+        );
+});
+
+it('does not include another users test history in wordStats', function () {
+    $owner = User::factory()->create();
+    $viewer = User::factory()->create();
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    createFinishedTestWithQuestions($owner, [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    $this->actingAs($viewer)
+        ->get('/words/'.$word->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Word')
+            ->where('wordStats', null)
+        );
+});
+
+it('excludes unfinished tests from wordStats', function () {
+    $user = User::factory()->create();
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    createUnfinishedTest($user);
+    $user->tests()->create([
+        'number_of_questions' => 1,
+        'questions_and_answers' => json_encode([
+            '1' => [
+                'id' => $word->id,
+                'type' => 'w',
+                'question' => 'Ciao',
+                'answer' => '',
+                'help' => '',
+            ],
+        ]),
+        'score' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/words/'.$word->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Word')
+            ->where('wordStats', null)
+        );
+});

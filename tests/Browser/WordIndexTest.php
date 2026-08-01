@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 it('shows the home page branding', function () {
     $page = visit('/');
 
@@ -47,4 +49,39 @@ it('can toggle translations on the home page', function () {
         ->click('Show Translation')
         ->assertSee('Thank you')
         ->assertSee('Hide Translation');
+});
+
+it('shows overall word stats on cards for a logged-in user with history', function () {
+    $user = User::factory()->create([
+        'username' => 'statsuser',
+        'password' => 'password',
+    ]);
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    createFinishedTestWithQuestions($user, [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+        '2' => [
+            'id' => $word->id,
+            'type' => 't',
+            'question' => 'Hello',
+            'answer' => 'wrong',
+            'correct' => false,
+            'correctAnswer' => 'ciao',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    $page = loginThroughBrowser($user);
+
+    $page->assertSee('Ciao')
+        ->assertSeeIn('@word-stats-'.$word->id, '50%')
+        ->assertNoJavascriptErrors();
 });

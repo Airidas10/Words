@@ -150,6 +150,31 @@ function createFinishedTest(User $user, int $score, int $numberOfQuestions = 3):
     ]);
 }
 
+/**
+ * @param  array<string, array<string, mixed>>  $questions  Keyed like "1", "2", …
+ */
+function createFinishedTestWithQuestions(User $user, array $questions, int $score): Test
+{
+    return $user->tests()->create([
+        'number_of_questions' => count($questions),
+        'questions_and_answers' => json_encode($questions),
+        'score' => $score,
+    ]);
+}
+
+function statsQuestionItem(int $wordId, string $type, bool $correct, string $question = 'Q'): array
+{
+    return [
+        'id' => $wordId,
+        'type' => $type,
+        'question' => $question,
+        'answer' => $correct ? 'ok' : 'nope',
+        'correct' => $correct,
+        'correctAnswer' => 'ok',
+        'help' => '',
+    ];
+}
+
 function createUnfinishedTest(User $user, int $numberOfQuestions = 3): Test
 {
     return $user->tests()->create([

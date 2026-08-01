@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('renders the home page for guests', function () {
@@ -9,6 +10,7 @@ it('renders the home page for guests', function () {
             ->component('WordIndex')
             ->has('wordsList.data', 0)
             ->where('totalWordCount', 0)
+            ->where('wordStats', null)
         );
 });
 
@@ -39,4 +41,110 @@ it('redirects guests from protected word routes to login', function () {
     $this->get('/tags')->assertRedirect('/login');
     $this->get('/my-tests')->assertRedirect('/login');
     $this->get('/export')->assertRedirect('/login');
+});
+
+it('passes null wordStats on the home page for guests even when words exist', function () {
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    createFinishedTestWithQuestions(User::factory()->create(), [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('WordIndex')
+            ->where('wordStats', null)
+        );
+});
+
+it('passes overall wordStats for listed words to an authenticated user', function () {
+    $user = User::factory()->create();
+    $ciao = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+    $grazie = createWordWithTranslationAndTag('Grazie', 'Thank you', 'Polite');
+
+    createFinishedTestWithQuestions($user, [
+        '1' => [
+            'id' => $ciao->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+        '2' => [
+            'id' => $grazie->id,
+            'type' => 'w',
+            'question' => 'Grazie',
+            'answer' => 'wrong',
+            'correct' => false,
+            'correctAnswer' => 'thank you',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    $this->actingAs($user)
+        ->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('WordIndex')
+            ->where('wordStats', function ($wordStats) use ($ciao, $grazie) {
+                expect($wordStats[(string) $ciao->id]['overall'] ?? $wordStats[$ciao->id]['overall'] ?? null)
+                    ->toMatchArray([
+                        'attempts' => 1,
+                        'correct' => 1,
+                        'incorrect' => 0,
+                    ])
+                    ->and($wordStats[(string) $grazie->id]['overall'] ?? $wordStats[$grazie->id]['overall'] ?? null)
+                    ->toMatchArray([
+                        'attempts' => 1,
+                        'correct' => 0,
+                        'incorrect' => 1,
+                    ]);
+
+                return true;
+            })
+        );
+});
+
+it('excludes unfinished tests from home page wordStats', function () {
+    $user = User::factory()->create();
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    $user->tests()->create([
+        'number_of_questions' => 1,
+        'questions_and_answers' => json_encode([
+            '1' => [
+                'id' => $word->id,
+                'type' => 'w',
+                'question' => 'Ciao',
+                'answer' => '',
+                'help' => '',
+            ],
+        ]),
+        'score' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('WordIndex')
+            ->where('wordStats', function ($wordStats) use ($word) {
+                $entry = $wordStats[(string) $word->id] ?? $wordStats[$word->id] ?? null;
+
+                expect($entry)->toBeNull();
+
+                return true;
+            })
+        );
 });

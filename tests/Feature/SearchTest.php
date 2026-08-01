@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('finds all matching words by word text', function () {
@@ -116,6 +117,76 @@ it('does not include unrelated words in a tag search', function () {
                 expect($wordNames)
                     ->toEqualCanonicalizing(['Rosso', 'Blu'])
                     ->not->toContain('Grande');
+
+                return true;
+            })
+        );
+});
+
+it('passes null wordStats on search results for guests', function () {
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    createFinishedTestWithQuestions(User::factory()->create(), [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    $this->get('/search/global/Ciao')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('WordIndex')
+            ->where('isSearching', true)
+            ->where('wordStats', null)
+        );
+});
+
+it('passes overall wordStats on search results for an authenticated user', function () {
+    $user = User::factory()->create();
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+    createWordWithTranslationAndTag('Ciabatta', 'Slipper', 'Food');
+
+    createFinishedTestWithQuestions($user, [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+        '2' => [
+            'id' => $word->id,
+            'type' => 't',
+            'question' => 'Hello',
+            'answer' => 'wrong',
+            'correct' => false,
+            'correctAnswer' => 'ciao',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    $this->actingAs($user)
+        ->get('/search/global/Cia')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('WordIndex')
+            ->where('isSearching', true)
+            ->where('wordStats', function ($wordStats) use ($word) {
+                $entry = $wordStats[(string) $word->id] ?? $wordStats[$word->id] ?? null;
+
+                expect($entry['overall'] ?? null)->toMatchArray([
+                    'attempts' => 2,
+                    'correct' => 1,
+                    'incorrect' => 1,
+                ]);
 
                 return true;
             })
