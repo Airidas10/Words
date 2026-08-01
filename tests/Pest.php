@@ -191,3 +191,33 @@ function createUnfinishedTest(User $user, int $numberOfQuestions = 3): Test
         'score' => null,
     ]);
 }
+
+function attachStruggleWord(User $user, Word|int $word): void
+{
+    $wordId = $word instanceof Word ? $word->id : $word;
+
+    $user->struggleWords()->syncWithoutDetaching([$wordId]);
+}
+
+/**
+ * Record finished attempts so overall accuracy is correct/(correct+incorrect).
+ */
+function recordWordAttempts(User $user, Word $word, int $correct, int $incorrect): void
+{
+    $questions = [];
+    $n = 1;
+
+    for ($i = 0; $i < $correct; $i++) {
+        $questions[(string) $n++] = statsQuestionItem($word->id, 'w', true, $word->word);
+    }
+
+    for ($i = 0; $i < $incorrect; $i++) {
+        $questions[(string) $n++] = statsQuestionItem($word->id, 'w', false, $word->word);
+    }
+
+    if ($questions === []) {
+        return;
+    }
+
+    createFinishedTestWithQuestions($user, $questions, score: $correct);
+}

@@ -5,6 +5,7 @@ use App\Models\Word;
 use App\Services\WordStatsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -228,4 +229,81 @@ it('serves cached aggregates until forget is called', function () {
         'incorrect' => 1,
         'accuracy' => 50.0,
     ]);
+});
+
+it('orders worstWords by lowest accuracy then highest attempts', function () {
+    $user = User::factory()->create();
+    $zeroFew = Word::factory()->create(['word' => 'ZeroFew']);
+    $zeroFew->translations()->create(['translation' => 'A']);
+    $zeroMany = Word::factory()->create(['word' => 'ZeroMany']);
+    $zeroMany->translations()->create(['translation' => 'B']);
+    $half = Word::factory()->create(['word' => 'Half']);
+    $half->translations()->create(['translation' => 'C']);
+    $perfect = Word::factory()->create(['word' => 'Perfect']);
+    $perfect->translations()->create(['translation' => 'D']);
+
+    recordWordAttempts($user, $zeroFew, correct: 0, incorrect: 1);
+    recordWordAttempts($user, $zeroMany, correct: 0, incorrect: 3);
+    recordWordAttempts($user, $half, correct: 1, incorrect: 1);
+    recordWordAttempts($user, $perfect, correct: 2, incorrect: 0);
+
+    $worst = app(WordStatsService::class)->worstWords($user);
+
+    expect($worst->pluck('word_id')->values()->all())->toBe([
+        $zeroMany->id,
+        $zeroFew->id,
+        $half->id,
+        $perfect->id,
+    ]);
+});
+
+it('limits worstWords to the requested count', function () {
+    $user = User::factory()->create();
+    $words = Word::factory()->count(4)->create()->each(function (Word $word) {
+        $word->translations()->create(['translation' => 'T']);
+    });
+
+    foreach ($words->values() as $index => $word) {
+        recordWordAttempts($user, $word, correct: $index, incorrect: 4 - $index);
+    }
+
+    $worst = app(WordStatsService::class)->worstWords($user, 2);
+
+    expect($worst)->toHaveCount(2)
+        ->and($worst->first()['word_id'])->toBe($words->values()->first()->id);
+});
+
+it('excludes words below stats_min_attempts from worstWords', function () {
+    Config::set('words.stats_min_attempts', 2);
+
+    $user = User::factory()->create();
+    $enough = Word::factory()->create(['word' => 'Enough']);
+    $enough->translations()->create(['translation' => 'A']);
+    $tooFew = Word::factory()->create(['word' => 'TooFew']);
+    $tooFew->translations()->create(['translation' => 'B']);
+
+    recordWordAttempts($user, $enough, correct: 0, incorrect: 2);
+    recordWordAttempts($user, $tooFew, correct: 0, incorrect: 1);
+
+    $worst = app(WordStatsService::class)->worstWords($user);
+
+    expect($worst->pluck('word_id')->all())->toBe([$enough->id]);
+});
+
+it('omits deleted words from worstWords', function () {
+    $user = User::factory()->create();
+    $kept = Word::factory()->create(['word' => 'Kept']);
+    $kept->translations()->create(['translation' => 'A']);
+    $gone = Word::factory()->create(['word' => 'Gone']);
+    $gone->translations()->create(['translation' => 'B']);
+
+    recordWordAttempts($user, $kept, correct: 1, incorrect: 0);
+    recordWordAttempts($user, $gone, correct: 0, incorrect: 2);
+
+    $gone->translations()->delete();
+    $gone->delete();
+
+    $worst = app(WordStatsService::class)->worstWords($user);
+
+    expect($worst->pluck('word_id')->all())->toBe([$kept->id]);
 });

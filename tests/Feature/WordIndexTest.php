@@ -40,6 +40,7 @@ it('redirects guests from protected word routes to login', function () {
     $this->get('/daily-dose')->assertRedirect('/login');
     $this->get('/tags')->assertRedirect('/login');
     $this->get('/my-tests')->assertRedirect('/login');
+    $this->get('/my-struggles')->assertRedirect('/login');
     $this->get('/export')->assertRedirect('/login');
 });
 
