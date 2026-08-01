@@ -98,13 +98,14 @@ it('passes overall wordStats for listed words to an authenticated user', functio
         ->assertInertia(fn (Assert $page) => $page
             ->component('WordIndex')
             ->where('wordStats', function ($wordStats) use ($ciao, $grazie) {
-                expect($wordStats[(string) $ciao->id]['overall'] ?? $wordStats[$ciao->id]['overall'] ?? null)
+                // Inertia JSON turns map keys into strings on the wire.
+                expect($wordStats[(string) $ciao->id]['overall'])
                     ->toMatchArray([
                         'attempts' => 1,
                         'correct' => 1,
                         'incorrect' => 0,
                     ])
-                    ->and($wordStats[(string) $grazie->id]['overall'] ?? $wordStats[$grazie->id]['overall'] ?? null)
+                    ->and($wordStats[(string) $grazie->id]['overall'])
                     ->toMatchArray([
                         'attempts' => 1,
                         'correct' => 0,
@@ -140,9 +141,7 @@ it('excludes unfinished tests from home page wordStats', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('WordIndex')
             ->where('wordStats', function ($wordStats) use ($word) {
-                $entry = $wordStats[(string) $word->id] ?? $wordStats[$word->id] ?? null;
-
-                expect($entry)->toBeNull();
+                expect($wordStats[(string) $word->id] ?? null)->toBeNull();
 
                 return true;
             })

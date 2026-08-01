@@ -89,7 +89,8 @@
             return null
         }
 
-        return props.wordStats[wordId] ?? props.wordStats[String(wordId)] ?? null
+        // Inertia JSON object keys are always strings.
+        return props.wordStats[String(wordId)] ?? null
     }
 
     function handleTagClick(data){

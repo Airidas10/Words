@@ -180,9 +180,8 @@ it('passes overall wordStats on search results for an authenticated user', funct
             ->component('WordIndex')
             ->where('isSearching', true)
             ->where('wordStats', function ($wordStats) use ($word) {
-                $entry = $wordStats[(string) $word->id] ?? $wordStats[$word->id] ?? null;
-
-                expect($entry['overall'] ?? null)->toMatchArray([
+                // Inertia JSON turns map keys into strings on the wire.
+                expect($wordStats[(string) $word->id]['overall'])->toMatchArray([
                     'attempts' => 2,
                     'correct' => 1,
                     'incorrect' => 1,

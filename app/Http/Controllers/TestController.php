@@ -62,7 +62,7 @@ class TestController extends Controller
         ]);
     }
 
-    public function submit(Request $request)
+    public function submit(Request $request, WordStatsService $wordStats)
     {
         $request->validate([
             'testId' => 'required|exists:tests,id',
@@ -136,7 +136,7 @@ class TestController extends Controller
 
         // Invalidate cache, so it's rebuilt on the next load.
         if ($response['status'] === 'success' && Auth::user()) {
-            app(WordStatsService::class)->forget(Auth::user());
+            $wordStats->forget(Auth::user());
         }
 
         return $response;
