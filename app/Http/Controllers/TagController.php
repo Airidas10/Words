@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use Auth;
 
 use App\Models\Tag;
+use App\Models\User;
 use App\Services\WordStatsService;
 
 use App\Http\Requests\TagRequest;
@@ -28,13 +29,14 @@ class TagController extends Controller
         $tag = Tag::with(['words.translations', 'words.tags'])->findOrFail($id);
         $user = Auth::user();
 
+        User::applyStruggleFlags($user, $tag->words);
+
         return Inertia::render('Tag', [
             'tag' => $tag,
             'wordStats' => $wordStats->forWordIdsIfAuthenticated(
                 $user,
                 $tag->words->pluck('id')->all(),
             ),
-            'struggleWordIds' => $user?->struggleWordIds(),
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Sanctum\Sanctum;
 
@@ -25,7 +26,8 @@ it('shows the my-struggles page with words and wordStats for an authenticated us
             ->has('words', 1)
             ->where('words.0.word', 'Ciao')
             ->where('words.0.translations.0.translation', 'Hello')
-            ->where('struggleWordIds', [$word->id])
+            ->where('words.0.in_struggles', true)
+            ->missing('words.0.pivot')
             ->where('wordStats', function ($wordStats) use ($word) {
                 expect($wordStats[(string) $word->id]['overall'])->toMatchArray([
                     'attempts' => 2,
@@ -65,6 +67,14 @@ it('allows an authenticated user to add a word to struggles', function () {
         'user_id' => $user->id,
         'word_id' => $word->id,
     ]);
+
+    $pivot = DB::table('user_word')
+        ->where('user_id', $user->id)
+        ->where('word_id', $word->id)
+        ->first();
+
+    expect($pivot->created_at)->not->toBeNull()
+        ->and($pivot->updated_at)->not->toBeNull();
 });
 
 it('is safe to add a word that is already in struggles', function () {
@@ -150,7 +160,7 @@ it('isolates struggles between users', function () {
         ->and($userB->fresh()->struggleWords->pluck('id')->all())->toBe([]);
 });
 
-it('passes struggleWordIds on the home page for an authenticated user', function () {
+it('passes in_struggles on home page words for an authenticated user', function () {
     $user = User::factory()->create();
     $inList = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
     createWordWithTranslationAndTag('Grazie', 'Thanks', 'Polite');
@@ -161,11 +171,17 @@ it('passes struggleWordIds on the home page for an authenticated user', function
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('WordIndex')
-            ->where('struggleWordIds', [$inList->id])
+            ->where('wordsList.data', function ($words) use ($inList) {
+                $words = collect($words);
+                expect($words->firstWhere('id', $inList->id)['in_struggles'])->toBeTrue()
+                    ->and($words->firstWhere('word', 'Grazie')['in_struggles'])->toBeFalse();
+
+                return true;
+            })
         );
 });
 
-it('passes struggleWordIds on the word show page for an authenticated user', function () {
+it('passes in_struggles on the word show page for an authenticated user', function () {
     $user = User::factory()->create();
     $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
     attachStruggleWord($user, $word);
@@ -175,22 +191,22 @@ it('passes struggleWordIds on the word show page for an authenticated user', fun
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Word')
-            ->where('struggleWordIds', [$word->id])
+            ->where('word.in_struggles', true)
         );
 });
 
-it('passes null struggleWordIds on the home page for guests', function () {
+it('passes in_struggles false on home page words for guests', function () {
     createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
 
     $this->get('/')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('WordIndex')
-            ->where('struggleWordIds', null)
+            ->where('wordsList.data.0.in_struggles', false)
         );
 });
 
-it('passes struggleWordIds on the tag show page for an authenticated user', function () {
+it('passes in_struggles on the tag show page for an authenticated user', function () {
     $user = User::factory()->create();
     $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
     $tag = $word->tags->first();
@@ -202,6 +218,6 @@ it('passes struggleWordIds on the tag show page for an authenticated user', func
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Tag')
-            ->where('struggleWordIds', [$word->id])
+            ->where('tag.words.0.in_struggles', true)
         );
 });

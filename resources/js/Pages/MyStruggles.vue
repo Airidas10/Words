@@ -29,7 +29,7 @@
                             <word-card
                                 :word="word"
                                 :stats="statsForWord(wordStats, word.id)"
-                                :in-struggles="isInStruggles(word.id)"
+                                :in-struggles="Boolean(word.in_struggles)"
                                 @tagClick="handleTagClick"
                                 @struggleChanged="handleStruggleChanged"
                             ></word-card>
@@ -63,7 +63,6 @@
     const props = defineProps({
         words: { type: Array, default: () => [] },
         wordStats: { type: Object, default: null },
-        struggleWordIds: { type: Array, default: () => [] },
     })
 
     const words = ref([...props.words])
@@ -73,12 +72,6 @@
     }, { deep: true })
 
     const showTranslation = computed(() => store.state.showTranslation)
-
-    const struggleIdSet = computed(() => new Set(props.struggleWordIds ?? []))
-
-    function isInStruggles(wordId) {
-        return struggleIdSet.value.has(wordId)
-    }
 
     function toggleTranslation() {
         store.commit('setShowTranslation', !showTranslation.value)

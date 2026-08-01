@@ -55,7 +55,7 @@ class User extends Authenticatable
 
     public function struggleWords(): BelongsToMany
     {
-        return $this->belongsToMany(Word::class, 'user_word');
+        return $this->belongsToMany(Word::class, 'user_word')->withTimestamps();
     }
 
     /**
@@ -68,5 +68,23 @@ class User extends Authenticatable
             ->map(fn ($id) => (int) $id)
             ->values()
             ->all();
+    }
+
+    /**
+     * Sets in_struggles boolean on each word for the toggle UI.
+     *
+     * @param  iterable<int, \App\Models\Word|null>  $words
+     */
+    public static function applyStruggleFlags(?self $user, iterable $words): void
+    {
+        $ids = $user ? array_flip($user->struggleWordIds()) : [];
+
+        foreach ($words as $word) {
+            if ($word === null) {
+                continue;
+            }
+
+            $word->setAttribute('in_struggles', isset($ids[(int) $word->id]));
+        }
     }
 }

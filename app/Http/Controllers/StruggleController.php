@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Word;
+use App\Models\User;
 use App\Services\WordStatsService;
 use Auth;
 use Illuminate\Http\JsonResponse;
@@ -18,13 +19,15 @@ class StruggleController extends Controller
             ->with(['translations', 'tags'])
             ->get();
 
+        User::applyStruggleFlags($user, $words);
+        $words->each->makeHidden('pivot');
+
         return Inertia::render('MyStruggles', [
             'words' => $words,
             'wordStats' => $wordStats->forWordIds(
                 $user,
                 $words->pluck('id')->all(),
             ),
-            'struggleWordIds' => $user->struggleWordIds(),
         ]);
     }
 

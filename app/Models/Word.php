@@ -30,6 +30,6 @@ class Word extends Model
 
     public function struggledByUsers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'user_word');
+        return $this->belongsToMany(User::class, 'user_word')->withTimestamps();
     }
 }

@@ -28,7 +28,7 @@
                     <StruggleToggle
                         v-if="user"
                         :word-id="word.id"
-                        :in-struggles="isInStruggles"
+                        :in-struggles="Boolean(word.in_struggles)"
                     />
                 </div>
             </div>
@@ -86,6 +86,7 @@
             <div v-if="isRandomPage" class="sm:ml-4 mt-2 sm:mt-0">
                 <InertiaLink
                     :href="nextRandomHref"
+                    :only="randomPartialOnly"
                     class="bg-blue-800 hover:bg-blue-900 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg transition-colors duration-150"
                     @click="nextWordClicked"
                 >
@@ -119,19 +120,13 @@
         randomPool: { type: String, default: 'all' },
         tagId: { type: [Number, String], default: null },
         tags: { type: Array, default: () => [] },
-        struggleWordIds: { type: Array, default: null },
     })
 
     const user = computed(() => store.state.user)
 
     const isRandomPage = computed(() => url.value === '/random' || url.value.startsWith('/random?'))
 
-    const isInStruggles = computed(() => {
-        if (!props.word || !props.struggleWordIds) {
-            return false
-        }
-        return props.struggleWordIds.includes(props.word.id)
-    })
+    const randomPartialOnly = ['word', 'wordStats', 'randomPool', 'tagId']
 
     const poolSelectValue = computed(() => {
         if (props.randomPool === 'struggles') {
@@ -164,7 +159,7 @@
             href = `/random?pool=tag&tag_id=${tagId}`
         }
 
-        router.visit(href)
+        router.visit(href, { only: randomPartialOnly })
     }
 
     const showTranslation = computed(() => store.state.showTranslation)

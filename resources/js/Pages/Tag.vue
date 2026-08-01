@@ -29,7 +29,7 @@
                             <word-card
                                 :word="word"
                                 :stats="statsForWord(wordStats, word.id)"
-                                :in-struggles="isInStruggles(word.id)"
+                                :in-struggles="Boolean(word.in_struggles)"
                                 @tagClick="handleTagClick"
                             ></word-card>
                         </InertiaLink>
@@ -62,16 +62,9 @@
     const props = defineProps({
         tag: Object,
         wordStats: { type: Object, default: null },
-        struggleWordIds: { type: Array, default: null },
     })
 
     const showTranslation = computed(() => store.state.showTranslation)
-
-    const struggleIdSet = computed(() => new Set(props.struggleWordIds ?? []))
-
-    function isInStruggles(wordId) {
-        return struggleIdSet.value.has(wordId)
-    }
 
     function handleTagClick(data) {
         let tagObj = data.tag

@@ -93,3 +93,19 @@ it('passes tags sorted alphabetically for the random dropdown', function () {
             })
         );
 });
+
+it('skips tags on random partial reloads so the client can keep them', function () {
+    createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+    Tag::factory()->create(['tag' => 'Alpha']);
+
+    $this->get('/random')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Word')
+            ->has('tags')
+            ->reloadOnly(['word', 'wordStats', 'randomPool', 'tagId'], function (Assert $page) {
+                $page->missing('tags')
+                    ->where('word.word', 'Ciao');
+            })
+        );
+});

@@ -10,6 +10,7 @@ use Inertia\Inertia;
 use Auth;
 
 use App\Models\Word;
+use App\Models\User;
 use App\Services\WordStatsService;
 
 class SearchController extends Controller
@@ -28,6 +29,8 @@ class SearchController extends Controller
                     $q->where('translation', 'like', '%' . $searchString . '%');
                 })->orderBy('created_at', 'desc')->paginate($wordsPerPage);
 
+                User::applyStruggleFlags(Auth::user(), $words->getCollection());
+
                 return Inertia::render('WordIndex', [
                     'wordsList' => $words,
                     'isSearching' => true,
@@ -36,7 +39,6 @@ class SearchController extends Controller
                         Auth::user(),
                         $words->getCollection()->pluck('id')->all(),
                     ),
-                    'struggleWordIds' => Auth::user()?->struggleWordIds(),
                 ]);
 
             case 'tag':
@@ -44,6 +46,8 @@ class SearchController extends Controller
                     $q->where('tag', $searchString);
                 })->orderBy('created_at', 'desc')->paginate($wordsPerPage);
 
+                User::applyStruggleFlags(Auth::user(), $words->getCollection());
+
                 return Inertia::render('WordIndex', [
                     'wordsList' => $words,
                     'isSearching' => true,
@@ -52,7 +56,6 @@ class SearchController extends Controller
                         Auth::user(),
                         $words->getCollection()->pluck('id')->all(),
                     ),
-                    'struggleWordIds' => Auth::user()?->struggleWordIds(),
                 ]);
 
             default:

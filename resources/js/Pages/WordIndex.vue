@@ -39,7 +39,7 @@
                             <word-card
                                 :word="word"
                                 :stats="statsForWord(wordStats, word.id)"
-                                :in-struggles="isInStruggles(word.id)"
+                                :in-struggles="Boolean(word.in_struggles)"
                                 @tagClick="handleTagClick"
                             ></word-card>
                         </InertiaLink>
@@ -78,7 +78,6 @@
         isSearching: { type: Boolean, default: false },
         searchData: { type: Object, default: {} },
         wordStats: { type: Object, default: null },
-        struggleWordIds: { type: Array, default: null },
     })
 
     const words = ref([])
@@ -88,12 +87,6 @@
     }, { deep: true, immediate: true })
 
     const user = computed(() => store.state.user)
-
-    const struggleIdSet = computed(() => new Set(props.struggleWordIds ?? []))
-
-    function isInStruggles(wordId) {
-        return struggleIdSet.value.has(wordId)
-    }
 
     function handleTagClick(data){
         let tagObj = data.tag

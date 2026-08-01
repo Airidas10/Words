@@ -14,6 +14,7 @@ return new class extends Migration
             $table->unsignedBigInteger('word_id');
             $table->foreign('word_id')->references('id')->on('words')->onDelete('cascade');
             $table->primary(['user_id', 'word_id']);
+            $table->timestamps();
         });
     }
 

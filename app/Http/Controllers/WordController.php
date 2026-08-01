@@ -13,6 +13,7 @@ use Auth;
 use App\Models\Word;
 use App\Models\Tag;
 use App\Models\Translation;
+use App\Models\User;
 use App\Services\WordStatsService;
 
 use App\Http\Requests\WordRequest;
@@ -26,6 +27,8 @@ class WordController extends Controller
         $wordCount = Word::count();
         $user = Auth::user();
 
+        User::applyStruggleFlags($user, $words->getCollection());
+
         return Inertia::render('WordIndex', [
             'wordsList' => $words,
             'totalWordCount' => $wordCount,
@@ -33,7 +36,6 @@ class WordController extends Controller
                 $user,
                 $words->getCollection()->pluck('id')->all(),
             ),
-            'struggleWordIds' => $user?->struggleWordIds(),
         ]);
     }
 
@@ -42,10 +44,11 @@ class WordController extends Controller
         $word = Word::with('tags', 'translations')->findOrFail($id);
         $user = Auth::user();
 
+        User::applyStruggleFlags($user, [$word]);
+
         return Inertia::render('Word', [
             'word' => $word,
             'wordStats' => $wordStats->forWordIfAuthenticated($user, (int) $word->id),
-            'struggleWordIds' => $user?->struggleWordIds(),
         ]);
     }
 
@@ -190,20 +193,37 @@ class WordController extends Controller
             $word = Word::with('tags', 'translations')->inRandomOrder()->first();
         }
 
+        User::applyStruggleFlags($user, [$word]);
+
         if ($request->ajax() && $request->header('Accept') === 'application/json') {
             return ['status' => 'success', 'msg' => 'Data fetched successfully', 'data' => $word];
         }
 
-        return Inertia::render('Word', [
+        $props = [
             'word' => $word,
             'wordStats' => $word
                 ? $wordStats->forWordIfAuthenticated($user, (int) $word->id)
                 : null,
             'randomPool' => $pool,
             'tagId' => $pool === 'tag' ? $tagId : null,
-            'tags' => Tag::orderBy('tag')->get(['id', 'tag']),
-            'struggleWordIds' => $user?->struggleWordIds(),
-        ]);
+        ];
+
+        if ($this->randomWantsTags($request)) {
+            $props['tags'] = Tag::orderBy('tag')->get(['id', 'tag']);
+        }
+
+        return Inertia::render('Word', $props);
+    }
+
+    private function randomWantsTags(Request $request): bool
+    {
+        $partial = $request->header('X-Inertia-Partial-Data');
+
+        if ($partial === null || $partial === '') {
+            return true;
+        }
+
+        return in_array('tags', array_map('trim', explode(',', $partial)), true);
     }
     
     public function export(Request $request)
