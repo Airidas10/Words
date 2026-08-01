@@ -68,7 +68,7 @@
     import { useStore } from 'vuex'
     import WordCard from '../Components/WordCard.vue'
     import Pagination from '../Components/Pagination.vue'
-    import { statsForWord } from '../Reusables/wordStatsDisplay'
+    import { statsForWord } from '../Reusables/WordStatsDisplay'
 
     const store = useStore()
 

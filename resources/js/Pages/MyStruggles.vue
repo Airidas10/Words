@@ -56,7 +56,7 @@
     import { Link as InertiaLink } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
     import WordCard from '../Components/WordCard.vue'
-    import { statsForWord } from '../Reusables/wordStatsDisplay'
+    import { statsForWord } from '../Reusables/WordStatsDisplay'
 
     const store = useStore()
 
