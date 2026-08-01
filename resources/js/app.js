@@ -1,10 +1,33 @@
 import './bootstrap';
 
 import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import Layout from './Layouts/Layout.vue';
 import store from './store.js'
+
+let reloadStrugglePropsAfterHistory = false
+
+window.addEventListener('popstate', () => {
+    reloadStrugglePropsAfterHistory = true
+})
+
+router.on('navigate', () => {
+    if (!reloadStrugglePropsAfterHistory) {
+        return
+    }
+
+    reloadStrugglePropsAfterHistory = false
+
+    if (!store.state.user) {
+        return
+    }
+
+    router.reload({
+        only: ['wordsList', 'word', 'words', 'tag', 'wordStats'],
+        preserveScroll: true,
+    })
+})
 
 createInertiaApp({
     resolve: name => {

@@ -68,7 +68,7 @@
 
     const badgeLabel = computed(() => {
         if (!hasStats.value) {
-            return '—'
+            return '?'
         }
 
         return `${formatAccuracy(props.stats.overall.accuracy)}%`

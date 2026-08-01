@@ -100,7 +100,7 @@ it('shows a dash and not-tested popover for a logged-in user with no history', f
     $page = loginThroughBrowser($user);
 
     $page->assertSee('Ciao')
-        ->assertSeeIn('@word-stats-'.$word->id, '—')
+        ->assertSeeIn('@word-stats-'.$word->id, '?')
         ->click('@word-stats-'.$word->id)
         ->assertSeeIn('@word-stats-popover-'.$word->id, 'Not tested yet')
         ->click('Close')

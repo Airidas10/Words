@@ -1,11 +1,6 @@
 <template>
     <div class="bg-white shadow-md rounded-lg p-4 h-full relative min-w-[120px] flex flex-col">
-        <div v-if="user" class="absolute top-2 right-2 flex items-center gap-1 z-10">
-            <StruggleToggle
-                :word-id="word.id"
-                :in-struggles="inStrugglesLocal"
-                @changed="handleStruggleChanged"
-            />
+        <div v-if="user" class="absolute top-2 right-2 z-10">
             <InertiaLink :href="`/words/edit/${word.id}`" class="text-sm text-blue-600 hover:underline flex items-center" @click.prevent.stop="handleEditClick">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M17.414 2.586a2 2 0 00-2.828 0L6 11.172V14h2.828l8.586-8.586a2 2 0 000-2.828zM7 12v-1.414l8.586-8.586a1 1 0 011.414 1.414L8.414 12H7z"/>
@@ -15,7 +10,7 @@
             </InertiaLink>
         </div>
 
-        <h2 class="text-xl font-semibold text-gray-800">{{ word.word }}</h2>
+        <h2 class="text-xl font-semibold text-gray-800" :class="{ 'pr-16': user }">{{ word.word }}</h2>
         <div class="flex-grow">
             <p v-for="translation in word.translations" :key="translation.id" class="text-gray-600">{{ showTranslation ? translation.translation : '*****' }}</p>
         </div>
@@ -46,7 +41,15 @@
                     {{ tag.tag }}
                 </span>
             </div>
-            <WordOverallStats :stats="stats" :word-id="word.id" />
+            <div class="flex items-center gap-1 shrink-0">
+                <StruggleToggle
+                    v-if="user"
+                    :word-id="word.id"
+                    :in-struggles="inStruggles"
+                    @changed="handleStruggleChanged"
+                />
+                <WordOverallStats :stats="stats" :word-id="word.id" />
+            </div>
         </div>
     </div>
 </template>
@@ -58,7 +61,7 @@
 </script>
 
 <script setup>
-    import { ref, computed, watch } from 'vue'
+    import { ref, computed } from 'vue'
     import { Link as InertiaLink } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
     import WordOverallStats from './WordOverallStats.vue'
@@ -76,11 +79,6 @@
 
     const showTranslation = computed(() => store.state.showTranslation)
     const user = computed(() => store.state.user)
-    const inStrugglesLocal = ref(props.inStruggles)
-
-    watch(() => props.inStruggles, (value) => {
-        inStrugglesLocal.value = value
-    })
 
     const isPopoverOpen = ref(false)
     function togglePopover(){
@@ -93,7 +91,6 @@
     }
 
     function handleStruggleChanged(payload) {
-        inStrugglesLocal.value = payload.inStruggles
         emits('struggleChanged', payload)
     }
 
