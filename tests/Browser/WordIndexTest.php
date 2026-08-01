@@ -83,5 +83,37 @@ it('shows overall word stats on cards for a logged-in user with history', functi
 
     $page->assertSee('Ciao')
         ->assertSeeIn('@word-stats-'.$word->id, '50%')
+        ->click('@word-stats-'.$word->id)
+        ->assertSeeIn('@word-stats-popover-'.$word->id, 'Your stats: 50% (1/2)')
+        ->click('Close')
+        ->assertDontSee('Your stats: 50% (1/2)')
+        ->assertNoJavascriptErrors();
+});
+
+it('shows a dash and not-tested popover for a logged-in user with no history', function () {
+    $user = User::factory()->create([
+        'username' => 'statsempty',
+        'password' => 'password',
+    ]);
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    $page = loginThroughBrowser($user);
+
+    $page->assertSee('Ciao')
+        ->assertSeeIn('@word-stats-'.$word->id, '—')
+        ->click('@word-stats-'.$word->id)
+        ->assertSeeIn('@word-stats-popover-'.$word->id, 'Not tested yet')
+        ->click('Close')
+        ->assertDontSee('Not tested yet')
+        ->assertNoJavascriptErrors();
+});
+
+it('does not show word card stats controls to guests', function () {
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    $page = visit('/');
+
+    $page->assertSee('Ciao')
+        ->assertMissing('@word-stats-'.$word->id)
         ->assertNoJavascriptErrors();
 });

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use App\Models\Word;
 
 it('opens a word show page from the home page for guests', function () {
@@ -18,6 +19,8 @@ it('opens a word show page from the home page for guests', function () {
         ->assertSee('A common greeting')
         ->assertSee('Hide Translation')
         ->assertDontSee('Next')
+        ->assertDontSee('Not tested yet')
+        ->assertDontSee('Your stats:')
         ->assertNoJavascriptErrors();
 });
 
@@ -60,4 +63,57 @@ it('shows translations heading for multiple translations', function () {
         ->assertSee('Translations:')
         ->assertSee('Hello')
         ->assertSee('Hi');
+});
+
+it('shows not tested yet on word show for a logged-in user without history', function () {
+    $user = User::factory()->create([
+        'username' => 'wordshowstats',
+        'password' => 'password',
+    ]);
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    $page = loginThroughBrowser($user);
+
+    $page->click('Ciao')
+        ->assertPathIs('/words/'.$word->id)
+        ->assertSeeIn('@word-stats-'.$word->id, 'Not tested yet')
+        ->assertDontSee('Your stats:')
+        ->assertNoJavascriptErrors();
+});
+
+it('shows detailed stats on word show for a logged-in user with history', function () {
+    $user = User::factory()->create([
+        'username' => 'wordshowhistory',
+        'password' => 'password',
+    ]);
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    createFinishedTestWithQuestions($user, [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => 'Hello',
+            'correct' => true,
+            'correctAnswer' => 'hello',
+            'help' => '',
+        ],
+        '2' => [
+            'id' => $word->id,
+            'type' => 't',
+            'question' => 'Hello',
+            'answer' => 'wrong',
+            'correct' => false,
+            'correctAnswer' => 'ciao',
+            'help' => '',
+        ],
+    ], score: 1);
+
+    $page = loginThroughBrowser($user);
+
+    $page->click('Ciao')
+        ->assertPathIs('/words/'.$word->id)
+        ->assertSeeIn('@word-stats-'.$word->id, 'Your stats: 50% (1/2)')
+        ->assertDontSee('Not tested yet')
+        ->assertNoJavascriptErrors();
 });
