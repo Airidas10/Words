@@ -13,8 +13,6 @@
             <p v-for="translation in word.translations" :key="translation.id" class="text-gray-600">{{ showTranslation ? translation.translation : '*****' }}</p>
         </div>
 
-        <WordOverallStats :stats="stats" :word-id="word.id" />
-
         <div v-if="word.description" class="relative flex-grow">
             <button @click.prevent.stop="togglePopover" class="text-blue-500 text-sm underline mt-1">
                 ⚠️
@@ -31,10 +29,18 @@
             </div>
         </div>
 
-        <div class="mt-4 flex flex-wrap gap-2">
-            <span  v-for="tag in word.tags"  @click.prevent.stop="handleTagClick(tag)" class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
-                {{ tag.tag }}
-            </span>
+        <div class="mt-4 flex items-end gap-2">
+            <div class="flex flex-wrap gap-2 flex-1 min-w-0">
+                <span
+                    v-for="tag in word.tags"
+                    :key="tag.id"
+                    @click.prevent.stop="handleTagClick(tag)"
+                    class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm"
+                >
+                    {{ tag.tag }}
+                </span>
+            </div>
+            <WordOverallStats :stats="stats" :word-id="word.id" />
         </div>
     </div>
 </template>
