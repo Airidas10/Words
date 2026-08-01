@@ -29,6 +29,29 @@ it('finds all matching words by word text', function () {
         );
 });
 
+it('shows all words when the global search string is empty', function () {
+    createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+    createWordWithTranslationAndTag('Grazie', 'Thanks', 'Polite');
+
+    $this->get('/search/global')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('WordIndex')
+            ->where('isSearching', true)
+            ->where('searchData.type', 'global')
+            ->where('searchData.searchString', null)
+            ->has('wordsList.data', 2)
+            ->where('wordsList.data', function ($words) {
+                expect(collect($words)->pluck('word')->all())->toEqualCanonicalizing([
+                    'Ciao',
+                    'Grazie',
+                ]);
+
+                return true;
+            })
+        );
+});
+
 it('finds all matching words by translation text', function () {
     createWordWithTranslationAndTag('Gatto', 'A catxyz pet', 'Animals');
     createWordWithTranslationAndTag('Gattino', 'Little catxyz', 'Animals');

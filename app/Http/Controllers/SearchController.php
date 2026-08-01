@@ -15,7 +15,7 @@ use App\Services\WordStatsService;
 
 class SearchController extends Controller
 {
-    public function search(Request $request, $type, $searchString = null, WordStatsService $wordStats)
+    public function search(Request $request, WordStatsService $wordStats, $type, $searchString = null)
     {
         $searchData = new stdClass();
         $searchData->type = $type;

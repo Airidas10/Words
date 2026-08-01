@@ -133,7 +133,11 @@
     }
 
     function search(type, string){
-        router.visit('/search/' + type + '/' + string)
+        const path = string
+            ? `/search/${type}/${encodeURIComponent(string)}`
+            : `/search/${type}`
+
+        router.visit(path)
     }
 
     const isMenuOpen = ref(false)
