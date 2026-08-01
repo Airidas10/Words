@@ -17,20 +17,31 @@
                     </InertiaLink>
                 </div>
 
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
                     <button v-if="words?.length > 0" @click="toggleTranslation" class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm">
                         {{ showTranslation ? 'Hide Translation' : 'Show Translation' }}
                     </button>
+                    <span v-else></span>
 
-                    <InertiaLink v-if="(!isSearching && user)" href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        Create New
-                    </InertiaLink>
+                    <div v-if="!isSearching && user" class="flex items-center gap-3 ml-auto">
+                        <InertiaLink href="/my-struggles" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            My Struggles
+                        </InertiaLink>
+                        <InertiaLink href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Create New
+                        </InertiaLink>
+                    </div>
                 </div>
 
                 <div v-if="words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-full">
                     <div v-for="word in words" :key="word.id">
                         <InertiaLink :href="`/words/${word.id}`">
-                            <word-card :word="word" :stats="statsForWord(wordStats, word.id)" @tagClick="handleTagClick"></word-card>
+                            <word-card
+                                :word="word"
+                                :stats="statsForWord(wordStats, word.id)"
+                                :in-struggles="isInStruggles(word.id)"
+                                @tagClick="handleTagClick"
+                            ></word-card>
                         </InertiaLink>
                     </div>
                 </div>
@@ -52,38 +63,37 @@
 </script>
 
 <script setup>
-    // Vue stuff
     import { ref, computed, watch } from 'vue'
-    // Libraries
     import { Link as InertiaLink } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
-    // Reusables
-    import { useAxiosRequest } from '../Reusables/AxiosRequest'
-    // Components
     import WordCard from '../Components/WordCard.vue'
     import Pagination from '../Components/Pagination.vue'
     import { statsForWord } from '../Reusables/wordStatsDisplay'
 
-    const { axiosRequest } = useAxiosRequest()
     const store = useStore()
 
-    // Props
     const props = defineProps({
         wordsList: { type: Object, default: {} },
         totalWordCount: { type: Number, default: null },
         isSearching: { type: Boolean, default: false },
         searchData: { type: Object, default: {} },
         wordStats: { type: Object, default: null },
+        struggleWordIds: { type: Array, default: null },
     })
 
     const words = ref([])
 
-    watch(() => props.wordsList, (newValue, oldValue) => {
-            words.value = props.wordsList.data
-        }, {deep: true, immediate: true}
-    )
+    watch(() => props.wordsList, () => {
+        words.value = props.wordsList?.data ?? []
+    }, { deep: true, immediate: true })
 
     const user = computed(() => store.state.user)
+
+    const struggleIdSet = computed(() => new Set(props.struggleWordIds ?? []))
+
+    function isInStruggles(wordId) {
+        return struggleIdSet.value.has(wordId)
+    }
 
     function handleTagClick(data){
         let tagObj = data.tag
@@ -119,7 +129,7 @@
 
 <style scoped>
     html, body {
-        overflow-x: hidden; /* Prevent horizontal scroll */
+        overflow-x: hidden;
         width: 100%;
         margin: 0;
     }

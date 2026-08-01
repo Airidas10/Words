@@ -6,6 +6,7 @@ use App\Http\Controllers\WordController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\StruggleController;
 
 Auth::routes((['register' => false, 'reset' => false, 'verify' => false, 'confirm' => false]));
 
@@ -22,6 +23,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/daily-dose', [TestController::class, 'index'])->name('tests.index');
     Route::get('/my-tests', [TestController::class, 'myTests'])->name('tests.tests');
     Route::get('/runs/{id}', [TestController::class, 'show'])->name('tests.show');
+
+    Route::get('/my-struggles', [StruggleController::class, 'index'])->name('struggles.index');
 });
 
 Route::get('/', [WordController::class, 'index'])->name('words.index');

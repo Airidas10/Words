@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
@@ -50,5 +51,22 @@ class User extends Authenticatable
     public function tests(): HasMany
     {
         return $this->hasMany(Test::class);
+    }
+
+    public function struggleWords(): BelongsToMany
+    {
+        return $this->belongsToMany(Word::class, 'user_word');
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function struggleWordIds(): array
+    {
+        return $this->struggleWords()
+            ->allRelatedIds()
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
     }
 }

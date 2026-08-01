@@ -1,12 +1,19 @@
 <template>
     <div class="bg-white shadow-md rounded-lg p-4 h-full relative min-w-[120px] flex flex-col">
-        <InertiaLink v-if="user" :href="`/words/edit/${word.id}`" class="absolute top-2 right-2 text-sm text-blue-600 hover:underline flex items-center" @click.prevent.stop="handleEditClick">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M17.414 2.586a2 2 0 00-2.828 0L6 11.172V14h2.828l8.586-8.586a2 2 0 000-2.828zM7 12v-1.414l8.586-8.586a1 1 0 011.414 1.414L8.414 12H7z"/>
-                <path fill-rule="evenodd" d="M4 15a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" clip-rule="evenodd"/>
-            </svg>
-            Edit
-        </InertiaLink>
+        <div v-if="user" class="absolute top-2 right-2 flex items-center gap-1 z-10">
+            <StruggleToggle
+                :word-id="word.id"
+                :in-struggles="inStrugglesLocal"
+                @changed="handleStruggleChanged"
+            />
+            <InertiaLink :href="`/words/edit/${word.id}`" class="text-sm text-blue-600 hover:underline flex items-center" @click.prevent.stop="handleEditClick">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.414 2.586a2 2 0 00-2.828 0L6 11.172V14h2.828l8.586-8.586a2 2 0 000-2.828zM7 12v-1.414l8.586-8.586a1 1 0 011.414 1.414L8.414 12H7z"/>
+                    <path fill-rule="evenodd" d="M4 15a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Edit
+            </InertiaLink>
+        </div>
 
         <h2 class="text-xl font-semibold text-gray-800">{{ word.word }}</h2>
         <div class="flex-grow">
@@ -18,7 +25,6 @@
                 ⚠️
             </button>
 
-            <!-- Popover Content -->
             <div v-if="isPopoverOpen" @click.prevent.stop class="absolute left-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 border border-gray-200 z-50">
                 <p class="text-gray-700 text-sm">
                     {{ word.description }}
@@ -52,25 +58,29 @@
 </script>
 
 <script setup>
-    // Vue stuff
-    import { ref, computed } from 'vue' 
-    // Libraries
+    import { ref, computed, watch } from 'vue'
     import { Link as InertiaLink } from '@inertiajs/vue3'
     import { useStore } from 'vuex'
     import WordOverallStats from './WordOverallStats.vue'
-    
+    import StruggleToggle from './StruggleToggle.vue'
+
     const store = useStore()
 
     const props = defineProps({
         word: { type: Object },
         stats: { type: Object, default: null },
+        inStruggles: { type: Boolean, default: false },
     })
 
-    const emits = defineEmits(['tagClick'])
+    const emits = defineEmits(['tagClick', 'struggleChanged'])
 
     const showTranslation = computed(() => store.state.showTranslation)
-
     const user = computed(() => store.state.user)
+    const inStrugglesLocal = ref(props.inStruggles)
+
+    watch(() => props.inStruggles, (value) => {
+        inStrugglesLocal.value = value
+    })
 
     const isPopoverOpen = ref(false)
     function togglePopover(){
@@ -80,6 +90,11 @@
     function handleTagClick(tag){
         let data = {tag: tag}
         emits('tagClick', data)
+    }
+
+    function handleStruggleChanged(payload) {
+        inStrugglesLocal.value = payload.inStruggles
+        emits('struggleChanged', payload)
     }
 
     function handleEditClick(){

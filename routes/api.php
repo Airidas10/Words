@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WordController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\StruggleController;
  
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -17,4 +18,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/tags/create', [TagController::class, 'store'])->name('tags.store'); 
     Route::match(['put', 'patch'], '/tags/update/{id}', [TagController::class, 'update'])->name('tags.update');
     Route::delete('/tags/destroy/{id}', [TagController::class, 'destroy'])->name('tags.destroy');
+
+    Route::post('/struggles/{word}', [StruggleController::class, 'store'])->name('struggles.store');
+    Route::delete('/struggles/{word}', [StruggleController::class, 'destroy'])->name('struggles.destroy');
 });

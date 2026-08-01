@@ -25,17 +25,13 @@ it('shows the my-struggles page with words and wordStats for an authenticated us
             ->has('words', 1)
             ->where('words.0.word', 'Ciao')
             ->where('words.0.translations.0.translation', 'Hello')
+            ->where('struggleWordIds', [$word->id])
             ->where('wordStats', function ($wordStats) use ($word) {
                 expect($wordStats[(string) $word->id]['overall'])->toMatchArray([
                     'attempts' => 2,
                     'correct' => 1,
                     'incorrect' => 1,
                 ]);
-
-                return true;
-            })
-            ->where('struggleWordIds', function ($ids) use ($word) {
-                expect(collect($ids)->map(fn ($id) => (int) $id)->all())->toContain($word->id);
 
                 return true;
             })
@@ -165,11 +161,7 @@ it('passes struggleWordIds on the home page for an authenticated user', function
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('WordIndex')
-            ->where('struggleWordIds', function ($ids) use ($inList) {
-                expect(collect($ids)->map(fn ($id) => (int) $id)->all())->toBe([$inList->id]);
-
-                return true;
-            })
+            ->where('struggleWordIds', [$inList->id])
         );
 });
 
@@ -183,26 +175,18 @@ it('passes struggleWordIds on the word show page for an authenticated user', fun
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Word')
-            ->where('struggleWordIds', function ($ids) use ($word) {
-                expect(collect($ids)->map(fn ($id) => (int) $id)->all())->toContain($word->id);
-
-                return true;
-            })
+            ->where('struggleWordIds', [$word->id])
         );
 });
 
-it('passes null or empty struggleWordIds on the home page for guests', function () {
+it('passes null struggleWordIds on the home page for guests', function () {
     createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
 
     $this->get('/')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('WordIndex')
-            ->where('struggleWordIds', function ($ids) {
-                expect($ids === null || $ids === [])->toBeTrue();
-
-                return true;
-            })
+            ->where('struggleWordIds', null)
         );
 });
 
@@ -218,10 +202,6 @@ it('passes struggleWordIds on the tag show page for an authenticated user', func
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Tag')
-            ->where('struggleWordIds', function ($ids) use ($word) {
-                expect(collect($ids)->map(fn ($id) => (int) $id)->all())->toContain($word->id);
-
-                return true;
-            })
+            ->where('struggleWordIds', [$word->id])
         );
 });

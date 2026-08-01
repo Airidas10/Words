@@ -27,4 +27,9 @@ class Word extends Model
     {
         return $this->belongsToMany(Word::class, 'related_words', 'word_id', 'related_word_id');
     }
+
+    public function struggledByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_word');
+    }
 }

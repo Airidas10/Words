@@ -24,24 +24,28 @@ class WordController extends Controller
         $wordsPerPage = config('words.words_per_page');
         $words = Word::with('tags', 'translations')->orderBy('created_at', 'desc')->paginate($wordsPerPage);
         $wordCount = Word::count();
+        $user = Auth::user();
 
         return Inertia::render('WordIndex', [
             'wordsList' => $words,
             'totalWordCount' => $wordCount,
             'wordStats' => $wordStats->forWordIdsIfAuthenticated(
-                Auth::user(),
+                $user,
                 $words->getCollection()->pluck('id')->all(),
             ),
+            'struggleWordIds' => $user?->struggleWordIds(),
         ]);
     }
 
     public function show($id, WordStatsService $wordStats)
     {
         $word = Word::with('tags', 'translations')->findOrFail($id);
+        $user = Auth::user();
 
         return Inertia::render('Word', [
             'word' => $word,
-            'wordStats' => $wordStats->forWordIfAuthenticated(Auth::user(), (int) $word->id),
+            'wordStats' => $wordStats->forWordIfAuthenticated($user, (int) $word->id),
+            'struggleWordIds' => $user?->struggleWordIds(),
         ]);
     }
 
@@ -160,18 +164,46 @@ class WordController extends Controller
 
     public function getRandomWord(Request $request, WordStatsService $wordStats)
     {
-        $word = Word::with('tags', 'translations')->inRandomOrder()->first();
+        $user = Auth::user();
+        $pool = $request->query('pool', 'all');
+        $tagId = $request->query('tag_id');
 
-        if($request->ajax() && $request->header('Accept') === 'application/json'){
+        if ($pool === 'struggles' && $user === null) {
+            $pool = 'all';
+        }
+
+        if ($pool === 'struggles') {
+            $struggleIds = $user->struggleWordIds();
+            $word = $struggleIds === []
+                ? null
+                : Word::with('tags', 'translations')
+                    ->whereIn('id', $struggleIds)
+                    ->inRandomOrder()
+                    ->first();
+        } elseif ($pool === 'tag' && $tagId !== null && $tagId !== '') {
+            $word = Word::with('tags', 'translations')
+                ->whereHas('tags', fn ($q) => $q->where('tags.id', $tagId))
+                ->inRandomOrder()
+                ->first();
+        } else {
+            $pool = 'all';
+            $word = Word::with('tags', 'translations')->inRandomOrder()->first();
+        }
+
+        if ($request->ajax() && $request->header('Accept') === 'application/json') {
             return ['status' => 'success', 'msg' => 'Data fetched successfully', 'data' => $word];
-        } else{
-            return Inertia::render('Word', [
-                'word' => $word,
-                'wordStats' => $word
-                    ? $wordStats->forWordIfAuthenticated(Auth::user(), (int) $word->id)
-                    : null,
-            ]);
-        }  
+        }
+
+        return Inertia::render('Word', [
+            'word' => $word,
+            'wordStats' => $word
+                ? $wordStats->forWordIfAuthenticated($user, (int) $word->id)
+                : null,
+            'randomPool' => $pool,
+            'tagId' => $pool === 'tag' ? $tagId : null,
+            'tags' => Tag::orderBy('tag')->get(['id', 'tag']),
+            'struggleWordIds' => $user?->struggleWordIds(),
+        ]);
     }
     
     public function export(Request $request)

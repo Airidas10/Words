@@ -26,13 +26,15 @@ class TagController extends Controller
     public function show($id, WordStatsService $wordStats)
     {
         $tag = Tag::with(['words.translations', 'words.tags'])->findOrFail($id);
+        $user = Auth::user();
 
         return Inertia::render('Tag', [
             'tag' => $tag,
             'wordStats' => $wordStats->forWordIdsIfAuthenticated(
-                Auth::user(),
+                $user,
                 $tag->words->pluck('id')->all(),
             ),
+            'struggleWordIds' => $user?->struggleWordIds(),
         ]);
     }
 

@@ -77,6 +77,36 @@ class WordStatsService
         Cache::forget($this->cacheKey($user));
     }
 
+    /**
+     * Worst words by overall accuracy ascending, then attempts descending.
+     * Only includes words with overall.attempts >= stats_min_attempts.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function worstWords(User $user, ?int $limit = null): Collection
+    {
+        $minAttempts = (int) config('words.stats_min_attempts');
+
+        $sorted = $this->aggregate($user)
+            ->filter(fn (array $stats) => ($stats['overall']['attempts'] ?? 0) >= $minAttempts)
+            ->sort(function (array $a, array $b) {
+                $byAccuracy = $a['overall']['accuracy'] <=> $b['overall']['accuracy'];
+
+                if ($byAccuracy !== 0) {
+                    return $byAccuracy;
+                }
+
+                return $b['overall']['attempts'] <=> $a['overall']['attempts'];
+            })
+            ->values();
+
+        if ($limit === null) {
+            return $sorted;
+        }
+
+        return $sorted->take($limit)->values();
+    }
+
     private function cacheKey(User $user): string
     {
         return 'user_word_stats:'.$user->id;

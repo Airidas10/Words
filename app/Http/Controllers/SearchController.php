@@ -36,6 +36,7 @@ class SearchController extends Controller
                         Auth::user(),
                         $words->getCollection()->pluck('id')->all(),
                     ),
+                    'struggleWordIds' => Auth::user()?->struggleWordIds(),
                 ]);
 
             case 'tag':
@@ -51,6 +52,7 @@ class SearchController extends Controller
                         Auth::user(),
                         $words->getCollection()->pluck('id')->all(),
                     ),
+                    'struggleWordIds' => Auth::user()?->struggleWordIds(),
                 ]);
 
             default:

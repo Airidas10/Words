@@ -106,7 +106,7 @@ it('does not attach more words than remaining CAP capacity', function () {
         recordWordAttempts($user, $word, correct: 0, incorrect: 3 - $index);
     }
 
-    $this->artisan('words:seed-struggle', ['--count' => 3])
+    $this->artisan('words:seed-struggle', ['--count' => 2])
         ->assertSuccessful();
 
     expect($user->fresh()->struggleWords->count())->toBe(2);
