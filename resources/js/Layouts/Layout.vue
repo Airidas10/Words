@@ -1,13 +1,13 @@
 <template>
     <div class="flex flex-col min-h-screen">
         <header class="bg-blue-800 text-white sticky top-0 z-50 shadow w-full">
-            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-                <InertiaLink href="/">
-                    <img :src="logo" alt="Logo" class="h-12">
+            <div class="container mx-auto px-4 py-3 flex items-center justify-between gap-2">
+                <InertiaLink href="/" class="shrink-0">
+                    <img :src="logo" alt="Logo" class="h-12 w-12 shrink-0">
                 </InertiaLink>
 
                 <form
-                    class="flex w-full max-w-xs items-center gap-1 rounded-full border border-white/20 bg-white/15 pl-3 pr-1 py-1 shadow-sm focus-within:ring-2 focus-within:ring-white/40 sm:max-w-sm lg:max-w-md"
+                    class="flex min-w-0 flex-1 max-w-xs items-center gap-1 rounded-full border border-white/20 bg-white/15 pl-3 pr-1 py-1 shadow-sm focus-within:ring-2 focus-within:ring-white/40 sm:max-w-sm lg:max-w-md"
                     @submit.prevent="triggerSearch"
                 >
                     <svg
@@ -35,7 +35,7 @@
                     </button>
                 </form>
 
-                <button class="text-white block lg:hidden focus:outline-none" @click="isMenuOpen = !isMenuOpen" aria-label="Toggle navigation menu">
+                <button class="shrink-0 text-white block lg:hidden focus:outline-none" @click="isMenuOpen = !isMenuOpen" aria-label="Toggle navigation menu">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
                     </svg>
