@@ -60,8 +60,21 @@ class SeedStruggleWords extends Command
                 continue;
             }
 
-            $user->struggleWords()->syncWithoutDetaching($toAttachIds);
-            $wordsAttached += count($toAttachIds);
+            $now = now();
+            $total = count($toAttachIds);
+
+            foreach ($toAttachIds as $index => $wordId) {
+                // Newest updated_at first on My Struggles; give worst (index 0) the latest timestamp.
+                // Sacrificing query efficiency to have them saved in desired order (worst to best)
+                $timestamp = $now->copy()->addSeconds($total - $index);
+
+                $user->struggleWords()->attach($wordId, [
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ]);
+            }
+
+            $wordsAttached += $total;
         }
 
         if ($dryRun) {

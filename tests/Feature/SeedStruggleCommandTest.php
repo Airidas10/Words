@@ -40,6 +40,33 @@ it('seeds each users worst words up to the requested count', function () {
         ->toBe(collect([$worst->id, $mid->id])->sort()->values()->all());
 });
 
+it('attaches seeded words so My Struggles pivot order is worst-first', function () {
+    Config::set('words.struggles_cap', 50);
+
+    $user = User::factory()->create();
+    $few = Word::factory()->create(['word' => 'ZeroFew']);
+    $few->translations()->create(['translation' => 'A']);
+    $many = Word::factory()->create(['word' => 'ZeroMany']);
+    $many->translations()->create(['translation' => 'B']);
+    $mid = Word::factory()->create(['word' => 'ZeroMid']);
+    $mid->translations()->create(['translation' => 'C']);
+
+    recordWordAttempts($user, $few, correct: 0, incorrect: 2);
+    recordWordAttempts($user, $many, correct: 0, incorrect: 6);
+    recordWordAttempts($user, $mid, correct: 0, incorrect: 3);
+
+    $this->artisan('words:seed-struggle', ['--count' => 3])
+        ->assertSuccessful();
+
+    $orderedIds = $user->fresh()
+        ->struggleWords()
+        ->orderByPivot('updated_at', 'desc')
+        ->pluck('words.id')
+        ->all();
+
+    expect($orderedIds)->toBe([$many->id, $mid->id, $few->id]);
+});
+
 it('does not duplicate words already in struggles when seeding', function () {
     Config::set('words.struggles_cap', 50);
 
