@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\WordStatsService;
 use Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,6 +30,25 @@ class StruggleController extends Controller
                 $user,
                 $words->pluck('id')->all(),
             ),
+        ]);
+    }
+
+    public function proposals(WordStatsService $wordStats): JsonResponse
+    {
+        $user = Auth::user();
+        $ids = $wordStats->worstWordsStats($user, 30)
+            ->pluck('word_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $words = $this->wordsInOrder($ids);
+        User::applyStruggleFlags($user, $words);
+        $words->each->makeHidden('pivot');
+
+        return response()->json([
+            'status' => 'success',
+            'words' => $words,
+            'wordStats' => $wordStats->forWordIds($user, $ids),
         ]);
     }
 
@@ -66,5 +86,27 @@ class StruggleController extends Controller
             'msg' => 'Word removed from My Struggles',
             'data' => null,
         ]);
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @return Collection<int, Word>
+     */
+    private function wordsInOrder(array $ids): Collection
+    {
+        if ($ids === []) {
+            return collect();
+        }
+
+        $byId = Word::query()
+            ->with(['translations', 'tags'])
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id');
+
+        return collect($ids)
+            ->map(fn (int $id) => $byId->get($id))
+            ->filter()
+            ->values();
     }
 }

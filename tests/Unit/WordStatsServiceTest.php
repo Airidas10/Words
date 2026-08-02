@@ -231,7 +231,7 @@ it('serves cached aggregates until forget is called', function () {
     ]);
 });
 
-it('orders worstWords by lowest accuracy then highest attempts', function () {
+it('orders worstWordsStats by lowest accuracy then highest attempts', function () {
     $user = User::factory()->create();
     $zeroFew = Word::factory()->create(['word' => 'ZeroFew']);
     $zeroFew->translations()->create(['translation' => 'A']);
@@ -247,7 +247,7 @@ it('orders worstWords by lowest accuracy then highest attempts', function () {
     recordWordAttempts($user, $half, correct: 1, incorrect: 1);
     recordWordAttempts($user, $perfect, correct: 2, incorrect: 0);
 
-    $worst = app(WordStatsService::class)->worstWords($user);
+    $worst = app(WordStatsService::class)->worstWordsStats($user);
 
     expect($worst->pluck('word_id')->values()->all())->toBe([
         $zeroMany->id,
@@ -257,7 +257,7 @@ it('orders worstWords by lowest accuracy then highest attempts', function () {
     ]);
 });
 
-it('limits worstWords to the requested count', function () {
+it('limits worstWordsStats to the requested count', function () {
     $user = User::factory()->create();
     $words = Word::factory()->count(4)->create()->each(function (Word $word) {
         $word->translations()->create(['translation' => 'T']);
@@ -267,13 +267,13 @@ it('limits worstWords to the requested count', function () {
         recordWordAttempts($user, $word, correct: $index, incorrect: 4 - $index);
     }
 
-    $worst = app(WordStatsService::class)->worstWords($user, 2);
+    $worst = app(WordStatsService::class)->worstWordsStats($user, 2);
 
     expect($worst)->toHaveCount(2)
         ->and($worst->first()['word_id'])->toBe($words->values()->first()->id);
 });
 
-it('excludes words below stats_min_attempts from worstWords', function () {
+it('excludes words below stats_min_attempts from worstWordsStats', function () {
     Config::set('words.stats_min_attempts', 2);
 
     $user = User::factory()->create();
@@ -285,12 +285,12 @@ it('excludes words below stats_min_attempts from worstWords', function () {
     recordWordAttempts($user, $enough, correct: 0, incorrect: 2);
     recordWordAttempts($user, $tooFew, correct: 0, incorrect: 1);
 
-    $worst = app(WordStatsService::class)->worstWords($user);
+    $worst = app(WordStatsService::class)->worstWordsStats($user);
 
     expect($worst->pluck('word_id')->all())->toBe([$enough->id]);
 });
 
-it('omits deleted words from worstWords', function () {
+it('omits deleted words from worstWordsStats', function () {
     $user = User::factory()->create();
     $kept = Word::factory()->create(['word' => 'Kept']);
     $kept->translations()->create(['translation' => 'A']);
@@ -303,7 +303,7 @@ it('omits deleted words from worstWords', function () {
     $gone->translations()->delete();
     $gone->delete();
 
-    $worst = app(WordStatsService::class)->worstWords($user);
+    $worst = app(WordStatsService::class)->worstWordsStats($user);
 
     expect($worst->pluck('word_id')->all())->toBe([$kept->id]);
 });

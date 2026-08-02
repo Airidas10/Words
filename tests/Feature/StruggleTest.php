@@ -28,6 +28,7 @@ it('shows the my-struggles page with words and wordStats for an authenticated us
             ->where('words.0.translations.0.translation', 'Hello')
             ->where('words.0.in_struggles', true)
             ->missing('words.0.pivot')
+            ->missing('proposedWords')
             ->where('wordStats', function ($wordStats) use ($word) {
                 expect($wordStats[(string) $word->id]['overall'])->toMatchArray([
                     'attempts' => 2,
@@ -38,6 +39,60 @@ it('shows the my-struggles page with words and wordStats for an authenticated us
                 return true;
             })
         );
+});
+
+it('rejects guests from fetching struggle proposals', function () {
+    $this->getJson('/api/struggles/proposals')
+        ->assertUnauthorized();
+});
+
+it('returns struggle proposals ordered by worst accuracy with flags and wordStats', function () {
+    $user = User::factory()->create();
+    $worst = createWordWithTranslationAndTag('Worst', 'A', 'Stats');
+    $mid = createWordWithTranslationAndTag('Mid', 'B', 'Stats');
+    $best = createWordWithTranslationAndTag('Best', 'C', 'Stats');
+
+    recordWordAttempts($user, $worst, correct: 0, incorrect: 2);
+    recordWordAttempts($user, $mid, correct: 1, incorrect: 1);
+    recordWordAttempts($user, $best, correct: 2, incorrect: 0);
+    attachStruggleWord($user, $mid);
+
+    Sanctum::actingAs($user);
+
+    $response = $this->getJson('/api/struggles/proposals')
+        ->assertOk()
+        ->assertJson([
+            'status' => 'success',
+        ])
+        ->assertJsonPath('words.0.word', 'Worst')
+        ->assertJsonPath('words.0.in_struggles', false)
+        ->assertJsonPath('words.0.translations.0.translation', 'A')
+        ->assertJsonPath('words.0.tags.0.tag', 'Stats')
+        ->assertJsonPath('words.1.word', 'Mid')
+        ->assertJsonPath('words.1.in_struggles', true)
+        ->assertJsonPath('words.2.word', 'Best')
+        ->assertJsonPath('words.2.in_struggles', false)
+        ->assertJsonMissingPath('words.0.pivot');
+
+    expect($response->json('wordStats.'.$worst->id.'.overall.attempts'))->toBe(2)
+        ->and($response->json('wordStats.'.$mid->id.'.overall.attempts'))->toBe(2)
+        ->and($response->json('wordStats.'.$best->id.'.overall.attempts'))->toBe(2);
+});
+
+it('returns empty struggle proposals when the user has no finished test history', function () {
+    $user = User::factory()->create();
+    createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+
+    Sanctum::actingAs($user);
+
+    $response = $this->getJson('/api/struggles/proposals')
+        ->assertOk()
+        ->assertJson([
+            'status' => 'success',
+            'words' => [],
+        ]);
+
+    expect($response->json('wordStats') ?? [])->toBeEmpty();
 });
 
 it('orders my-struggles words by pivot updated_at descending', function () {

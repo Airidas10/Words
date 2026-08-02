@@ -18,19 +18,31 @@
                 </div>
 
                 <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
-                    <button v-if="words?.length > 0" @click="toggleTranslation" class="text-blue-600 hover:text-blue-800 ml-2 cursor-pointer text-sm">
-                        {{ showTranslation ? 'Hide Translation' : 'Show Translation' }}
-                    </button>
-                    <span v-else></span>
-
-                    <div v-if="!isSearching && user" class="flex items-center gap-3 ml-auto">
-                        <InertiaLink href="/my-struggles" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <button
+                            v-if="words?.length > 0"
+                            type="button"
+                            class="text-blue-600 hover:text-blue-800 cursor-pointer text-sm"
+                            @click="toggleTranslation"
+                        >
+                            {{ showTranslation ? 'Hide Translation' : 'Show Translation' }}
+                        </button>
+                        <InertiaLink
+                            v-if="!isSearching && user"
+                            href="/my-struggles"
+                            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
                             My Struggles
                         </InertiaLink>
-                        <InertiaLink href="/words/create" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                            Create New
-                        </InertiaLink>
                     </div>
+
+                    <InertiaLink
+                        v-if="!isSearching && user"
+                        href="/words/create"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ml-auto"
+                    >
+                        Create New
+                    </InertiaLink>
                 </div>
 
                 <div v-if="words?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-full">

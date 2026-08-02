@@ -83,7 +83,7 @@ class WordStatsService
      *
      * @return Collection<int, array<string, mixed>>
      */
-    public function worstWords(User $user, ?int $limit = null): Collection
+    public function worstWordsStats(User $user, ?int $limit = null): Collection
     {
         $minAttempts = (int) config('words.stats_min_attempts');
 

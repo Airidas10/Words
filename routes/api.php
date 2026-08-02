@@ -19,6 +19,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::match(['put', 'patch'], '/tags/update/{id}', [TagController::class, 'update'])->name('tags.update');
     Route::delete('/tags/destroy/{id}', [TagController::class, 'destroy'])->name('tags.destroy');
 
+    Route::get('/struggles/proposals', [StruggleController::class, 'proposals'])->name('struggles.proposals');
     Route::post('/struggles/{word}', [StruggleController::class, 'store'])->name('struggles.store');
     Route::delete('/struggles/{word}', [StruggleController::class, 'destroy'])->name('struggles.destroy');
 });

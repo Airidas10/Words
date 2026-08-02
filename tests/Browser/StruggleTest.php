@@ -119,3 +119,79 @@ it('does not show my struggles in the random pool dropdown for guests', function
         ->assertDontSee('My Struggles')
         ->assertNoJavascriptErrors();
 });
+
+it('loads struggle proposals only after the user triggers suggestions', function () {
+    $user = User::factory()->create([
+        'username' => 'strugglepropose',
+        'password' => 'password',
+    ]);
+    $listed = createWordWithTranslationAndTag('Listed', 'On list', 'Stats');
+    $worst = createWordWithTranslationAndTag('WorstPropose', 'Bad', 'Stats');
+
+    attachStruggleWord($user, $listed);
+    recordWordAttempts($user, $worst, correct: 0, incorrect: 2);
+    recordWordAttempts($user, $listed, correct: 1, incorrect: 1);
+
+    $page = loginThroughBrowser($user);
+
+    $page->click('My Struggles')
+        ->assertPathIs('/my-struggles')
+        ->assertSee('Listed')
+        ->assertDontSee('WorstPropose')
+        ->assertPresent('@struggle-proposals-trigger')
+        ->assertMissing('@struggle-proposals')
+        ->click('@struggle-proposals-trigger')
+        ->assertPresent('@struggle-proposals')
+        ->assertSeeIn('@struggle-proposals', 'WorstPropose')
+        ->assertPresent('@struggle-propose-toggle-'.$worst->id)
+        ->assertDataAttribute('@struggle-propose-toggle-'.$worst->id, 'in-struggles', 'false')
+        ->assertEnabled('@struggle-propose-toggle-'.$worst->id)
+        ->assertNoJavascriptErrors();
+});
+
+it('adds a proposed word to struggles and leaves the proposal control unaddable', function () {
+    $user = User::factory()->create([
+        'username' => 'struggleproposeadd',
+        'password' => 'password',
+    ]);
+    $worst = createWordWithTranslationAndTag('WorstAdd', 'Bad', 'Stats');
+    recordWordAttempts($user, $worst, correct: 0, incorrect: 2);
+
+    $page = loginThroughBrowser($user);
+
+    $page->click('My Struggles')
+        ->assertPathIs('/my-struggles')
+        ->click('@struggle-proposals-trigger')
+        ->assertPresent('@struggle-propose-toggle-'.$worst->id)
+        ->click('@struggle-propose-toggle-'.$worst->id)
+        ->assertDataAttribute('@struggle-propose-toggle-'.$worst->id, 'in-struggles', 'true')
+        ->assertDisabled('@struggle-propose-toggle-'.$worst->id)
+        ->assertPresent('@struggle-toggle-'.$worst->id)
+        ->assertNoJavascriptErrors();
+
+    $this->assertDatabaseHas('user_word', [
+        'user_id' => $user->id,
+        'word_id' => $worst->id,
+    ]);
+});
+
+it('shows already-listed proposed words as unaddable', function () {
+    $user = User::factory()->create([
+        'username' => 'struggleproposeunaddable',
+        'password' => 'password',
+    ]);
+    $word = createWordWithTranslationAndTag('AlreadyListed', 'Bad', 'Stats');
+    recordWordAttempts($user, $word, correct: 0, incorrect: 2);
+    attachStruggleWord($user, $word);
+
+    $page = loginThroughBrowser($user);
+
+    $page->click('My Struggles')
+        ->assertPathIs('/my-struggles')
+        ->assertSee('AlreadyListed')
+        ->click('@struggle-proposals-trigger')
+        ->assertPresent('@struggle-propose-toggle-'.$word->id)
+        ->assertDataAttribute('@struggle-propose-toggle-'.$word->id, 'in-struggles', 'true')
+        ->assertDisabled('@struggle-propose-toggle-'.$word->id)
+        ->assertNoJavascriptErrors();
+});

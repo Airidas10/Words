@@ -33,7 +33,7 @@ class SeedStruggleWords extends Command
             $existingIds = $user->struggleWordIds();
             $remaining = max(0, $cap - count($existingIds));
 
-            $toAttachIds = $wordStats->worstWords($user, $count)
+            $toAttachIds = $wordStats->worstWordsStats($user, $count)
                 ->pluck('word_id')
                 ->map(fn ($id) => (int) $id)
                 ->reject(fn (int $id) => in_array($id, $existingIds, true))
