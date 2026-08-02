@@ -17,7 +17,8 @@ it('shows a word from the pool on the random page', function () {
     $page = visit('/random')
         ->assertPathIs('/random')
         ->assertSee('Next')
-        ->assertSee('Hide Translation');
+        ->assertSee('Show Translation')
+        ->assertSee('*****');
 
     $content = $page->content();
 
@@ -31,7 +32,8 @@ it('can navigate through several random words', function () {
     $page = visit('/random')
         ->assertPathIs('/random')
         ->assertSee('Next')
-        ->assertSee('Hide Translation');
+        ->assertSee('Show Translation')
+        ->assertSee('*****');
 
     foreach (range(1, 5) as $visit) {
         $content = $page->content();
@@ -40,16 +42,10 @@ it('can navigate through several random words', function () {
             ->toBeTrue("Expected a pool word on random visit #{$visit}");
 
         $page->assertPathIs('/random')
-            ->assertSee('Next');
-
-        if ($visit === 1) {
-            $page->assertSee('Hide Translation');
-        } else {
-            // Next commits showTranslation=false; proves the click advanced the run.
-            $page->assertSee('Show Translation')
-                ->assertSee('*****')
-                ->assertDontSee('Hide Translation');
-        }
+            ->assertSee('Next')
+            ->assertSee('Show Translation')
+            ->assertSee('*****')
+            ->assertDontSee('Hide Translation');
 
         $page->click('Next');
     }
@@ -68,15 +64,15 @@ it('hides translations after clicking next', function () {
     createWordPool(30);
 
     $page = visit('/random')
+        ->assertSee('Show Translation')
+        ->assertSee('*****')
+        ->click('Show Translation')
         ->assertSee('Hide Translation')
         ->click('Next')
         ->assertPathIs('/random')
         ->assertSee('Show Translation')
         ->assertSee('*****')
-        ->assertDontSee('Hide Translation')
-        ->click('Show Translation')
-        ->assertSee('Hide Translation')
-        ->assertDontSee('*****');
+        ->assertDontSee('Hide Translation');
 });
 
 it('filters tags and selects a tag pool from the random picker', function () {

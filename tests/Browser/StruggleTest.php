@@ -107,6 +107,28 @@ it('shows my struggles in the random pool dropdown for authenticated users', fun
         ->assertNoJavascriptErrors();
 });
 
+it('selects my struggles pool from the random picker', function () {
+    $user = User::factory()->create([
+        'username' => 'strugglepool',
+        'password' => 'password',
+    ]);
+    $struggle = createWordWithTranslationAndTag('StruggleOnly', 'Only mine', 'Greeting');
+    createWordWithTranslationAndTag('NotStruggle', 'Elsewhere', 'Polite');
+    attachStruggleWord($user, $struggle);
+
+    $page = loginThroughBrowser($user);
+
+    $page->click('Random')
+        ->assertPathIs('/random')
+        ->click('@random-pool-select')
+        ->click('@random-pool-option-struggles')
+        ->assertPathIs('/random')
+        ->assertQueryStringHas('pool', 'struggles')
+        ->assertSee('StruggleOnly')
+        ->assertDontSee('NotStruggle')
+        ->assertNoJavascriptErrors();
+});
+
 it('does not show my struggles in the random pool dropdown for guests', function () {
     createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
 

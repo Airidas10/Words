@@ -165,6 +165,12 @@
     const showDescription = ref(true)
     const showStats = ref(true)
 
+    watch(isRandomPage, (isRandom) => {
+        if (isRandom) {
+            store.commit('setShowTranslation', false)
+        }
+    }, { immediate: true })
+
     function toggleDescription(){
         showDescription.value = ! showDescription.value
     }

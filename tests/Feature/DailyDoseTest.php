@@ -217,6 +217,54 @@ it('tracks a fully incorrect submission', function () {
         ->and($results['1']['correctAnswer'])->toBe('hello');
 });
 
+it('scores answers case-insensitively', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+    $other = createWordWithTranslationAndTag('Grazie', 'Thank you', 'Polite');
+
+    $testData = [
+        '1' => [
+            'id' => $word->id,
+            'type' => 'w',
+            'question' => 'Ciao',
+            'answer' => '',
+            'help' => '',
+        ],
+        '2' => [
+            'id' => $other->id,
+            'type' => 't',
+            'question' => 'Thank you',
+            'answer' => '',
+            'help' => '',
+        ],
+    ];
+
+    $test = $user->tests()->create([
+        'number_of_questions' => 2,
+        'questions_and_answers' => json_encode($testData),
+        'score' => null,
+    ]);
+
+    $this->postJson('/api/tests/submit', [
+        'testId' => $test->id,
+        'testData' => [
+            '1' => array_merge($testData['1'], ['answer' => 'HELLO']),
+            '2' => array_merge($testData['2'], ['answer' => 'gRaZiE']),
+        ],
+    ])->assertOk();
+
+    $test->refresh();
+    $results = json_decode($test->questions_and_answers, true);
+
+    expect($test->score)->toBe(2)
+        ->and($results['1']['correct'])->toBeTrue()
+        ->and($results['1']['answer'])->toBe('HELLO')
+        ->and($results['2']['correct'])->toBeTrue()
+        ->and($results['2']['answer'])->toBe('gRaZiE');
+});
+
 it('tracks mixed correct and incorrect answers', function () {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
