@@ -24,6 +24,12 @@ class TestController extends Controller
 
         // If no last test found, or last one is not from today and has a score, create new test...
         if(!$lastTest || ($lastTest && $lastTest->score !== null)){
+            if (Word::count() < $questionsPerTest) {
+                return Inertia::render('Error', [
+                    'message' => 'Not enough words to start a Daily Dose. Add more words first.',
+                ]);
+            }
+
             $testData = collect();
             $usedWordIds = [];
             for($i = 1; $i <= $questionsPerTest; $i++){

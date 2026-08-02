@@ -40,6 +40,20 @@ it('starts a daily dose with the configured number of questions', function () {
     ]);
 });
 
+it('shows an error when there are not enough words for a daily dose', function () {
+    createWordPool(2);
+    Sanctum::actingAs(User::factory()->create());
+
+    $this->get('/daily-dose')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Error')
+            ->where('message', 'Not enough words to start a Daily Dose. Add more words first.')
+        );
+
+    $this->assertDatabaseCount('tests', 0);
+});
+
 it('does not send correct answers to the frontend for an unfinished test', function () {
     createWordPool(10);
     Sanctum::actingAs(User::factory()->create());
