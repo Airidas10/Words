@@ -270,3 +270,34 @@ it('returns not found when editing a missing word', function () {
         'word' => 'Ciao',
     ]))->assertNotFound();
 });
+
+it('rejects editing a word with another words translation id', function () {
+    Sanctum::actingAs(User::factory()->create());
+
+    $ciao = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
+    $grazie = createWordWithTranslationAndTag('Grazie', 'Thank you', 'Polite');
+    $foreignTranslation = $grazie->translations->first();
+
+    $this->putJson('/api/words/update/'.$ciao->id, wordPayload([
+        'id' => $ciao->id,
+        'word' => 'Ciao',
+        'translations' => [
+            [
+                'id' => $foreignTranslation->id,
+                'translation' => 'Hacked',
+                'test_help' => null,
+            ],
+        ],
+    ]))->assertNotFound();
+
+    $this->assertDatabaseHas('translations', [
+        'id' => $foreignTranslation->id,
+        'word_id' => $grazie->id,
+        'translation' => 'Thank you',
+    ]);
+
+    $this->assertDatabaseHas('translations', [
+        'word_id' => $ciao->id,
+        'translation' => 'Hello',
+    ]);
+});

@@ -119,7 +119,7 @@ class WordController extends Controller
                 $handledIds = [];
                 foreach($request->translations as $translationData){
                     if(isset($translationData['id']) && is_numeric($translationData['id'])){
-                        $translation = Translation::findOrFail($translationData['id']);
+                        $translation = $word->translations()->whereKey($translationData['id'])->firstOrFail();
                         if ($translation->translation !== $translationData['translation'] || $translation->test_help !== $translationData['test_help']){
                             $translation->update([
                                 'translation' => $translationData['translation'],
