@@ -1,5 +1,8 @@
 <template>
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white rounded-lg shadow-md flex flex-col items-center">
+    <div
+        class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white rounded-lg shadow-md flex flex-col items-center"
+        :class="{ 'pb-24 md:pb-8': isRandomPage }"
+    >
         <div v-if="isRandomPage" class="w-full mb-6">
             <RandomPoolPicker
                 :value="poolSelectValue"
@@ -10,9 +13,9 @@
         </div>
 
         <template v-if="word">
-            <div class="flex items-center justify-center w-full mb-6">
-                <div class="flex flex-col sm:flex-row items-center justify-center w-full gap-2">
-                    <h1 class="text-3xl font-semibold text-gray-800 text-center break-words">{{ word.word }}</h1>
+            <div class="flex flex-col items-center w-full mb-6 gap-3">
+                <h1 class="text-3xl font-semibold text-gray-800 text-center break-words">{{ word.word }}</h1>
+                <div class="flex flex-row items-center justify-center gap-2">
                     <button
                         v-if="canSpeak"
                         type="button"
@@ -80,17 +83,18 @@
             <p class="text-gray-600 text-lg">No words in this pool.</p>
         </div>
 
-        <div class="mt-6 w-full text-center">
-            <div v-if="isRandomPage" class="sm:ml-4 mt-2 sm:mt-0">
-                <InertiaLink
-                    :href="nextRandomHref"
-                    :only="randomPartialOnly"
-                    class="bg-blue-800 hover:bg-blue-900 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg transition-colors duration-150"
-                    @click="nextWordClicked"
-                >
-                    Next
-                </InertiaLink>
-            </div>
+        <div
+            v-if="isRandomPage"
+            class="fixed bottom-0 inset-x-0 z-40 flex justify-center bg-gradient-to-t from-gray-100 from-40% via-gray-100/90 to-transparent px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-10 pointer-events-none md:static md:inset-auto md:z-auto md:bg-none md:pointer-events-auto md:px-0 md:pb-0 md:pt-6"
+        >
+            <InertiaLink
+                :href="nextRandomHref"
+                :only="randomPartialOnly"
+                class="pointer-events-auto inline-block bg-blue-800 hover:bg-blue-900 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg transition-colors duration-150"
+                @click="nextWordClicked"
+            >
+                Next
+            </InertiaLink>
         </div>
     </div>
 </template>
