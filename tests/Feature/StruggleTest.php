@@ -40,6 +40,35 @@ it('shows the my-struggles page with words and wordStats for an authenticated us
         );
 });
 
+it('orders my-struggles words by pivot updated_at descending', function () {
+    $user = User::factory()->create();
+    $older = createWordWithTranslationAndTag('Vecchio', 'Old', 'Time');
+    $newer = createWordWithTranslationAndTag('Nuovo', 'New', 'Time');
+
+    attachStruggleWord($user, $older);
+    attachStruggleWord($user, $newer);
+
+    DB::table('user_word')->where([
+        'user_id' => $user->id,
+        'word_id' => $older->id,
+    ])->update(['updated_at' => now()->subDay()]);
+
+    DB::table('user_word')->where([
+        'user_id' => $user->id,
+        'word_id' => $newer->id,
+    ])->update(['updated_at' => now()]);
+
+    Sanctum::actingAs($user);
+
+    $this->get('/my-struggles')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('MyStruggles')
+            ->where('words.0.word', 'Nuovo')
+            ->where('words.1.word', 'Vecchio')
+        );
+});
+
 it('rejects guests from adding a word to struggles', function () {
     $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
 

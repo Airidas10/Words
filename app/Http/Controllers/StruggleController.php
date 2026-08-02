@@ -17,6 +17,7 @@ class StruggleController extends Controller
         $user = Auth::user();
         $words = $user->struggleWords()
             ->with(['translations', 'tags'])
+            ->orderByPivot('updated_at', 'desc')
             ->get();
 
         User::applyStruggleFlags($user, $words);
