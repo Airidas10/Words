@@ -1,24 +1,12 @@
 <template>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white rounded-lg shadow-md flex flex-col items-center">
         <div v-if="isRandomPage" class="w-full mb-6">
-            <label for="random-pool-select" class="block text-sm font-medium text-gray-700 mb-2 text-center">Word pool</label>
-            <select
-                id="random-pool-select"
-                data-testid="random-pool-select"
-                class="block w-full max-w-md mx-auto rounded-md border border-blue-200 bg-white px-3 py-2 text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <RandomPoolPicker
                 :value="poolSelectValue"
+                :tags="tags"
+                :user="user"
                 @change="onPoolChange"
-            >
-                <option value="all">Full Random</option>
-                <option v-if="user" value="struggles">My Struggles</option>
-                <option
-                    v-for="tag in tags"
-                    :key="tag.id"
-                    :value="`tag:${tag.id}`"
-                >
-                    {{ tag.tag }}
-                </option>
-            </select>
+            />
         </div>
 
         <template v-if="word">
@@ -119,6 +107,7 @@
     import { useStore } from 'vuex'
     import WordOverallStats from '../Components/WordOverallStats.vue'
     import StruggleToggle from '../Components/StruggleToggle.vue'
+    import RandomPoolPicker from '../Components/RandomPoolPicker.vue'
 
     const store = useStore()
     const page = usePage()
@@ -158,8 +147,7 @@
         return '/random'
     })
 
-    function onPoolChange(event) {
-        const value = event.target.value
+    function onPoolChange(value) {
         let href = '/random'
 
         if (value === 'struggles') {

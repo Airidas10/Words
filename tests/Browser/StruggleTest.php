@@ -100,8 +100,10 @@ it('shows my struggles in the random pool dropdown for authenticated users', fun
     $page->click('Random')
         ->assertPathIs('/random')
         ->assertPresent('@random-pool-select')
-        ->assertSourceHas('My Struggles')
-        ->assertSourceHas('Full Random')
+        ->click('@random-pool-select')
+        ->assertPresent('@random-pool-panel')
+        ->assertSee('Full Random')
+        ->assertSee('My Struggles')
         ->assertNoJavascriptErrors();
 });
 
@@ -111,7 +113,9 @@ it('does not show my struggles in the random pool dropdown for guests', function
     visit('/random')
         ->assertPathIs('/random')
         ->assertPresent('@random-pool-select')
-        ->assertSourceHas('Full Random')
-        ->assertSourceMissing('My Struggles')
+        ->click('@random-pool-select')
+        ->assertPresent('@random-pool-panel')
+        ->assertSee('Full Random')
+        ->assertDontSee('My Struggles')
         ->assertNoJavascriptErrors();
 });

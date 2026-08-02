@@ -78,3 +78,24 @@ it('hides translations after clicking next', function () {
         ->assertSee('Hide Translation')
         ->assertDontSee('*****');
 });
+
+it('filters tags and selects a tag pool from the random picker', function () {
+    $food = createWordWithTranslationAndTag('Pizza', 'Pizza', 'Food');
+    createWordWithTranslationAndTag('Rosso', 'Red', 'Colors');
+    $tag = $food->tags->first();
+
+    $page = visit('/random')
+        ->assertPresent('@random-pool-select')
+        ->click('@random-pool-select')
+        ->assertPresent('@random-pool-panel')
+        ->assertPresent('@random-pool-filter')
+        ->fill('@random-pool-filter', 'Foo')
+        ->assertSee('Food')
+        ->assertDontSee('Colors')
+        ->click('@random-pool-option-tag-'.$tag->id)
+        ->assertPathIs('/random')
+        ->assertQueryStringHas('pool', 'tag')
+        ->assertQueryStringHas('tag_id', (string) $tag->id)
+        ->assertSee('Food')
+        ->assertNoJavascriptErrors();
+});
