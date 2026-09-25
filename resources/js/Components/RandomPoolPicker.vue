@@ -1,9 +1,5 @@
 <template>
     <div ref="root" class="relative w-full max-w-md mx-auto">
-        <label id="random-pool-label" class="block text-sm font-medium text-gray-700 mb-2 text-center">
-            Word pool
-        </label>
-
         <button
             id="random-pool-select"
             type="button"
@@ -50,6 +46,18 @@
                         @click="choose('all')"
                     >
                         Full Random
+                    </button>
+
+                    <button
+                        type="button"
+                        role="option"
+                        data-testid="random-pool-option-newest"
+                        class="block w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50"
+                        :class="{ 'bg-blue-50 font-medium text-blue-800': value === 'newest' }"
+                        :aria-selected="value === 'newest'"
+                        @click="choose('newest')"
+                    >
+                        100 Newest Words
                     </button>
 
                     <button
@@ -116,6 +124,10 @@
     const currentLabel = computed(() => {
         if (props.value === 'struggles') {
             return 'My Struggles'
+        }
+
+        if (props.value === 'newest') {
+            return '100 Newest Words'
         }
 
         if (props.value.startsWith('tag:')) {

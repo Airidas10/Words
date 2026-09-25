@@ -2,6 +2,7 @@
 
 use App\Models\Tag;
 use App\Models\User;
+use App\Models\Word;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Sanctum\Sanctum;
 
@@ -61,6 +62,44 @@ it('falls back to the full pool when a guest requests struggles', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('Word')
             ->where('word.word', 'Ciao')
+        );
+});
+
+it('picks only from the 100 newest words', function () {
+    $oldest = createWordWithTranslationAndTag('OldestWord', 'Old', 'Greeting');
+    $oldest->forceFill([
+        'created_at' => now()->subYear(),
+        'updated_at' => now()->subYear(),
+    ])->save();
+
+    $newest = collect(range(1, 100))->map(function (int $i) {
+        $word = Word::factory()->create([
+            'word' => 'Newest'.$i,
+            'created_at' => now()->subMinutes(101 - $i),
+        ]);
+        $word->translations()->create([
+            'translation' => 'Translation '.$i,
+        ]);
+
+        return 'Newest'.$i;
+    });
+
+    $this->get('/random?pool=newest')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Word')
+            ->where('randomPool', 'newest')
+            ->where('word.word', fn ($word) => $newest->contains($word))
+        );
+});
+
+it('returns a null word when there are no newest words', function () {
+    $this->get('/random?pool=newest')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Word')
+            ->where('word', null)
+            ->where('randomPool', 'newest')
         );
 });
 

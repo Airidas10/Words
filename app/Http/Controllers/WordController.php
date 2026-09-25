@@ -188,6 +188,19 @@ class WordController extends Controller
                 ->whereHas('tags', fn ($q) => $q->where('tags.id', $tagId))
                 ->inRandomOrder()
                 ->first();
+        } elseif ($pool === 'newest') {
+            $newestIds = Word::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->limit(100)
+                ->pluck('id');
+
+            $word = $newestIds->isEmpty()
+                ? null
+                : Word::with('tags', 'translations')
+                    ->whereIn('id', $newestIds)
+                    ->inRandomOrder()
+                    ->first();
         } else {
             $pool = 'all';
             $word = Word::with('tags', 'translations')->inRandomOrder()->first();

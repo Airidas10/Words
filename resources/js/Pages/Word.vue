@@ -135,6 +135,9 @@
         if (props.randomPool === 'struggles') {
             return 'struggles'
         }
+        if (props.randomPool === 'newest') {
+            return 'newest'
+        }
         if (props.randomPool === 'tag' && props.tagId != null) {
             return `tag:${props.tagId}`
         }
@@ -144,6 +147,9 @@
     const nextRandomHref = computed(() => {
         if (props.randomPool === 'struggles') {
             return '/random?pool=struggles'
+        }
+        if (props.randomPool === 'newest') {
+            return '/random?pool=newest'
         }
         if (props.randomPool === 'tag' && props.tagId != null) {
             return `/random?pool=tag&tag_id=${props.tagId}`
@@ -156,6 +162,8 @@
 
         if (value === 'struggles') {
             href = '/random?pool=struggles'
+        } else if (value === 'newest') {
+            href = '/random?pool=newest'
         } else if (value.startsWith('tag:')) {
             const tagId = value.slice('tag:'.length)
             href = `/random?pool=tag&tag_id=${tagId}`

@@ -75,6 +75,23 @@ it('hides translations after clicking next', function () {
         ->assertDontSee('Hide Translation');
 });
 
+it('selects the 100 newest words pool from the random picker', function () {
+    createWordWithTranslationAndTag('Pizza', 'Pizza', 'Food');
+
+    visit('/random')
+        ->assertPresent('@random-pool-select')
+        ->click('@random-pool-select')
+        ->assertSeeIn('@random-pool-panel', '100 Newest Words')
+        ->click('@random-pool-option-newest')
+        ->assertPathIs('/random')
+        ->assertQueryStringHas('pool', 'newest')
+        ->assertSee('Pizza')
+        ->click('Next')
+        ->assertPathIs('/random')
+        ->assertQueryStringHas('pool', 'newest')
+        ->assertNoJavascriptErrors();
+});
+
 it('filters tags and selects a tag pool from the random picker', function () {
     $food = createWordWithTranslationAndTag('Pizza', 'Pizza', 'Food');
     createWordWithTranslationAndTag('Rosso', 'Red', 'Colors');
