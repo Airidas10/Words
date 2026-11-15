@@ -4,7 +4,13 @@ use App\Models\Tag;
 use App\Models\Test;
 use App\Models\User;
 use App\Models\Word;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Vite;
+use Pest\Browser\Execution;
+use Pest\Browser\Playwright\Playwright;
 use Tests\TestCase;
 
 /*
@@ -21,6 +27,16 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature', 'Browser');
+
+pest()->beforeEach(function () {
+    Playwright::setTimeout(15000);
+    // public/hot points at the Vite dev server, which the test browser cannot reach.
+    Vite::useHotFile(storage_path('framework/testing-no-hot'));
+})->in('Browser');
+
+pest()->afterEach(function () {
+    Carbon::setTestNow();
+})->in('Unit', 'Feature', 'Browser');
 
 /*
 |--------------------------------------------------------------------------
@@ -68,19 +84,31 @@ function createWordWithTranslationAndTag(string $wordText, string $translationTe
 }
 
 /**
- * @return \Illuminate\Support\Collection<int, Word>
+ * @return Collection<int, Word>
  */
-function createWordPool(int $count = 30): \Illuminate\Support\Collection
+function createWordPool(int $count = 30): Collection
 {
-    return Word::factory()
-        ->count($count)
-        ->create()
-        ->each(function (Word $word) {
-            $word->translations()->create([
-                'translation' => 'Translation for '.$word->word,
-            ]);
-        })
-        ->fresh(['translations']);
+    $words = new EloquentCollection();
+
+    foreach (range(1, $count) as $i) {
+        $word = Word::factory()->create([
+            'word' => sprintf('PoolWord%02d', $i),
+            'description' => sprintf('PoolDescription%02d', $i),
+        ]);
+
+        $word->translations()->create([
+            'translation' => sprintf('PoolTranslation%02d', $i),
+        ]);
+
+        $words->push($word);
+    }
+
+    return $words->fresh(['translations']);
+}
+
+function waitForBrowser(callable $assertion): mixed
+{
+    return Execution::instance()->waitForExpectation($assertion);
 }
 
 function wordPayload(array $overrides = []): array
