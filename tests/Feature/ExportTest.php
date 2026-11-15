@@ -11,12 +11,14 @@ it('redirects guests away from export', function () {
 });
 
 it('downloads a csv of words for an authenticated user', function () {
+    Carbon::setTestNow(Carbon::parse('2024-06-15 12:00:00'));
+
     Sanctum::actingAs(User::factory()->create());
 
     $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
     $word->translations()->create(['translation' => 'Hi']);
 
-    $withoutTranslations = Word::factory()->create(['word' => 'Solo']);
+    Word::factory()->create(['word' => 'Solo']);
 
     $filename = 'words-'.Carbon::now()->format('m-d-Y').'.csv';
 
@@ -25,11 +27,22 @@ it('downloads a csv of words for an authenticated user', function () {
     $response->assertOk()
         ->assertDownload($filename);
 
-    $csv = file_get_contents($response->baseResponse->getFile()->getPathname());
+    $handle = fopen($response->baseResponse->getFile()->getPathname(), 'r');
+    $header = fgetcsv($handle);
+    $translationsByWord = [];
 
-    expect($csv)->toContain('Word,Translations')
-        ->and($csv)->toContain('Ciao,"Hello, Hi"')
-        ->and($csv)->toContain('Solo,-');
+    while (($row = fgetcsv($handle)) !== false) {
+        [$word, $translations] = $row;
+        $translationsByWord[$word] = $translations;
+    }
+
+    fclose($handle);
+
+    $ciaoTranslations = array_map('trim', explode(',', $translationsByWord['Ciao']));
+
+    expect($header)->toBe(['Word', 'Translations'])
+        ->and($ciaoTranslations)->toEqualCanonicalizing(['Hello', 'Hi'])
+        ->and($translationsByWord['Solo'])->toBe('-');
 });
 
 it('returns an error page when csv generation fails', function () {
