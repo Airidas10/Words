@@ -17,11 +17,14 @@ it('redirects guests away from the daily dose page', function () {
 it('lets an authenticated user start a daily dose', function () {
     createWordPool(10);
 
-    $page = loginThroughBrowser()
-        ->click('Daily Dose')
+    $page = loginThroughBrowser();
+
+    $page->click('Daily Dose');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/daily-dose')
         ->assertSee('Submit')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 
     expect(Test::count())->toBe(1);
     expect(Test::first()->score)->toBeNull();
@@ -31,25 +34,34 @@ it('lets an authenticated user start a daily dose', function () {
 it('keeps the same unfinished test after leaving and returning', function () {
     createWordPool(10);
 
-    $page = loginThroughBrowser()
-        ->click('Daily Dose')
-        ->assertSee('Submit');
+    $page = loginThroughBrowser();
+
+    $page->click('Daily Dose');
+
+    waitForBrowser(fn () => $page->assertSee('Submit'));
 
     $test = Test::first();
     $questions = collect(json_decode($test->questions_and_answers, true))->pluck('question');
 
-    foreach ($questions as $question) {
-        $page->assertSee($question);
-    }
+    waitForBrowser(function () use ($page, $questions) {
+        foreach ($questions as $question) {
+            $page->assertSee($question);
+        }
+    });
 
-    $page->click('Home')
-        ->assertPathIs('/')
-        ->click('Daily Dose')
-        ->assertPathIs('/daily-dose');
+    $page->click('Home');
 
-    foreach ($questions as $question) {
-        $page->assertSee($question);
-    }
+    waitForBrowser(fn () => $page->assertPathIs('/'));
+
+    $page->click('Daily Dose');
+
+    waitForBrowser(function () use ($page, $questions) {
+        $page->assertPathIs('/daily-dose');
+
+        foreach ($questions as $question) {
+            $page->assertSee($question);
+        }
+    });
 
     expect(Test::count())->toBe(1);
     expect(Test::first()->id)->toBe($test->id);
@@ -59,9 +71,11 @@ it('keeps the same unfinished test after leaving and returning', function () {
 it('submits correct answers and shows a full score', function () {
     createWordPool(10);
 
-    $page = loginThroughBrowser()
-        ->click('Daily Dose')
-        ->assertSee('Submit');
+    $page = loginThroughBrowser();
+
+    $page->click('Daily Dose');
+
+    waitForBrowser(fn () => $page->assertSee('Submit'));
 
     $test = Test::first();
     $questions = json_decode($test->questions_and_answers, true);
@@ -73,11 +87,12 @@ it('submits correct answers and shows a full score', function () {
     handleConfirmationDialog($page);
     $page->click('Submit');
 
-    $page->assertPathIs('/runs/'.$test->id)
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/runs/'.$test->id)
         ->assertSee('Your score is: 3 / 3')
         ->assertSee('✔')
         ->assertDontSee('✘')
-        ->assertSee('Click here to start a new run');
+        ->assertSee('Click here to start a new run'));
 
     expect($test->fresh()->score)->toBe(3);
 });
@@ -85,9 +100,11 @@ it('submits correct answers and shows a full score', function () {
 it('submits incorrect answers and tracks them as wrong', function () {
     createWordPool(10);
 
-    $page = loginThroughBrowser()
-        ->click('Daily Dose')
-        ->assertSee('Submit');
+    $page = loginThroughBrowser();
+
+    $page->click('Daily Dose');
+
+    waitForBrowser(fn () => $page->assertSee('Submit'));
 
     $test = Test::first();
     $questions = json_decode($test->questions_and_answers, true);
@@ -99,10 +116,11 @@ it('submits incorrect answers and tracks them as wrong', function () {
     handleConfirmationDialog($page);
     $page->click('Submit');
 
-    $page->assertPathIs('/runs/'.$test->id)
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/runs/'.$test->id)
         ->assertSee('Your score is: 0 / 3')
         ->assertSee('✘')
-        ->assertDontSee('✔');
+        ->assertDontSee('✔'));
 
     $results = json_decode($test->fresh()->questions_and_answers, true);
 
@@ -117,9 +135,11 @@ it('submits incorrect answers and tracks them as wrong', function () {
 it('starts a new test after finishing the previous one', function () {
     createWordPool(10);
 
-    $page = loginThroughBrowser()
-        ->click('Daily Dose')
-        ->assertSee('Submit');
+    $page = loginThroughBrowser();
+
+    $page->click('Daily Dose');
+
+    waitForBrowser(fn () => $page->assertSee('Submit'));
 
     $firstTest = Test::first();
 
@@ -130,10 +150,13 @@ it('starts a new test after finishing the previous one', function () {
     handleConfirmationDialog($page);
     $page->click('Submit');
 
-    $page->assertPathIs('/runs/'.$firstTest->id)
-        ->click('Click here to start a new run')
+    waitForBrowser(fn () => $page->assertPathIs('/runs/'.$firstTest->id));
+
+    $page->click('Click here to start a new run');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/daily-dose')
-        ->assertSee('Submit');
+        ->assertSee('Submit'));
 
     expect(Test::count())->toBe(2);
 
@@ -141,7 +164,9 @@ it('starts a new test after finishing the previous one', function () {
 
     expect($secondTest->id)->not->toBe($firstTest->id);
 
-    foreach (json_decode($secondTest->questions_and_answers, true) as $item) {
-        $page->assertSee($item['question']);
-    }
+    waitForBrowser(function () use ($page, $secondTest) {
+        foreach (json_decode($secondTest->questions_and_answers, true) as $item) {
+            $page->assertSee($item['question']);
+        }
+    });
 });

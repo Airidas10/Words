@@ -5,17 +5,24 @@ use App\Models\Tag;
 it('keeps the tag when delete confirmation is cancelled', function () {
     $tag = Tag::factory()->create(['tag' => 'Greeting']);
 
-    $page = loginThroughBrowser()
-        ->click('Tags')
-        ->click('Edit')
+    $page = loginThroughBrowser();
+
+    $page->click('Tags');
+
+    waitForBrowser(fn () => $page->assertSee('Edit'));
+
+    $page->click('Edit');
+
+    waitForBrowser(fn () => $page
         ->assertSee('Edit Tag')
-        ->assertSee('Delete');
+        ->assertSee('Delete'));
 
     handleConfirmationDialog($page, accept: false);
     $page->click('Delete');
 
-    $page->assertPathIs('/tags/edit/'.$tag->id)
-        ->assertSee('Edit Tag');
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/tags/edit/'.$tag->id)
+        ->assertSee('Edit Tag'));
 
     $this->assertDatabaseHas('tags', [
         'id' => $tag->id,
@@ -27,18 +34,22 @@ it('allows deleting a tag', function () {
     $tag = Tag::factory()->create(['tag' => 'Greeting']);
     Tag::factory()->create(['tag' => 'Polite']);
 
-    $page = loginThroughBrowser()
-        ->click('Tags')
-        ->assertSee('Greeting')
-        ->navigate('/tags/edit/'.$tag->id)
+    $page = loginThroughBrowser();
+
+    $page->click('Tags');
+
+    waitForBrowser(fn () => $page->assertSee('Greeting'));
+
+    $page->navigate('/tags/edit/'.$tag->id)
         ->assertSee('Edit Tag');
 
     handleConfirmationDialog($page);
     $page->click('Delete');
 
-    $page->assertPathIs('/tags')
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/tags')
         ->assertSee('Polite')
-        ->assertDontSee('Greeting');
+        ->assertDontSee('Greeting'));
 
     $this->assertDatabaseMissing('tags', [
         'id' => $tag->id,

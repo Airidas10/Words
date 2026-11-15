@@ -8,8 +8,11 @@ it('opens a word show page from the home page for guests', function () {
     $word->update(['description' => 'A common greeting']);
 
     $page = visit('/')
-        ->assertSee('Ciao')
-        ->click('Ciao')
+        ->assertSee('Ciao');
+
+    $page->click('Ciao');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/words/'.$word->id)
         ->assertSee('Ciao')
         ->assertSee('Hello')
@@ -21,17 +24,21 @@ it('opens a word show page from the home page for guests', function () {
         ->assertDontSee('Next')
         ->assertDontSee('Not tested yet')
         ->assertDontSee('Your stats:')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 });
 
 it('can toggle translations on the word show page', function () {
     createWordWithTranslationAndTag('Grazie', 'Thank you', 'Polite');
 
-    $page = visit('/')
-        ->click('Grazie')
+    $page = visit('/');
+
+    $page->click('Grazie');
+
+    waitForBrowser(fn () => $page
         ->assertSee('Thank you')
-        ->assertSee('Hide Translation')
-        ->click('Hide Translation')
+        ->assertSee('Hide Translation'));
+
+    $page->click('Hide Translation')
         ->assertSee('*****')
         ->assertDontSee('Thank you')
         ->assertSee('Show Translation')
@@ -74,11 +81,13 @@ it('shows not tested yet on word show for a logged-in user without history', fun
 
     $page = loginThroughBrowser($user);
 
-    $page->click('Ciao')
+    $page->click('Ciao');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/words/'.$word->id)
         ->assertSeeIn('@word-stats-'.$word->id, 'Not tested yet')
         ->assertDontSee('Your stats:')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 });
 
 it('shows detailed stats on word show for a logged-in user with history', function () {
@@ -111,9 +120,11 @@ it('shows detailed stats on word show for a logged-in user with history', functi
 
     $page = loginThroughBrowser($user);
 
-    $page->click('Ciao')
+    $page->click('Ciao');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/words/'.$word->id)
         ->assertSeeIn('@word-stats-'.$word->id, 'Your stats: 50% (1/2)')
         ->assertDontSee('Not tested yet')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 });

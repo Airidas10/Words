@@ -19,19 +19,24 @@ it('redirects guests away from the create word page', function () {
 
 it('allows an authenticated user to create a word', function () {
     $page = loginThroughBrowser()
-        ->assertSee('Create New')
-        ->click('Create New')
-        ->assertSee('Create New Word')
-        ->fill('word', 'Ciao')
-        ->fill('#translation-temp-1', 'Hello')
-        ->fill('description', 'A common greeting')
-        ->click('Save');
+        ->assertSee('Create New');
 
-    $page->assertPathIs('/')
+    $page->click('Create New');
+
+    waitForBrowser(fn () => $page->assertSee('Create New Word'));
+
+    $page->fill('word', 'Ciao')
+        ->fill('#translation-temp-1', 'Hello')
+        ->fill('description', 'A common greeting');
+
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Ciao')
         ->assertSee('Hello')
         ->assertSee('Hide Translation')
-        ->assertDontSee('Nothing to show here');
+        ->assertDontSee('Nothing to show here'));
 
     $this->assertDatabaseHas('words', [
         'word' => 'Ciao',
@@ -40,17 +45,21 @@ it('allows an authenticated user to create a word', function () {
 });
 
 it('rejects creating a word with empty required fields', function () {
-    $page = loginThroughBrowser()
-        ->click('Create New')
-        ->assertSee('Create New Word')
-        ->click('Save');
+    $page = loginThroughBrowser();
 
-    $page->assertPathIs('/words/create')
+    $page->click('Create New');
+
+    waitForBrowser(fn () => $page->assertSee('Create New Word'));
+
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/words/create')
         ->assertSee('Create New Word')
         ->assertSee('The word field is required.')
         ->assertVisible('@word-error')
         ->assertSee('The translation field is required.')
-        ->assertVisible('@translation-error-0');
+        ->assertVisible('@translation-error-0'));
 
     $this->assertDatabaseCount('words', 0);
 });
@@ -58,17 +67,22 @@ it('rejects creating a word with empty required fields', function () {
 it('rejects creating a duplicate word', function () {
     createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
 
-    $page = loginThroughBrowser()
-        ->click('Create New')
-        ->assertSee('Create New Word')
-        ->fill('word', 'Ciao')
-        ->fill('#translation-temp-1', 'Hello again')
-        ->click('Save');
+    $page = loginThroughBrowser();
 
-    $page->assertPathIs('/words/create')
+    $page->click('Create New');
+
+    waitForBrowser(fn () => $page->assertSee('Create New Word'));
+
+    $page->fill('word', 'Ciao')
+        ->fill('#translation-temp-1', 'Hello again');
+
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/words/create')
         ->assertSee('Create New Word')
         ->assertSee('This word (Ciao) already exists!')
-        ->assertVisible('@form-error');
+        ->assertVisible('@form-error'));
 
     $this->assertDatabaseCount('words', 1);
     $this->assertDatabaseHas('words', [
@@ -77,19 +91,24 @@ it('rejects creating a duplicate word', function () {
 });
 
 it('allows creating a word with multiple translations', function () {
-    $page = loginThroughBrowser()
-        ->click('Create New')
-        ->assertSee('Create New Word')
-        ->fill('word', 'Ciao')
+    $page = loginThroughBrowser();
+
+    $page->click('Create New');
+
+    waitForBrowser(fn () => $page->assertSee('Create New Word'));
+
+    $page->fill('word', 'Ciao')
         ->fill('#translation-temp-1', 'Hello')
         ->click('Add more')
-        ->fill('#translation-temp-2', 'Hi')
-        ->click('Save');
+        ->fill('#translation-temp-2', 'Hi');
 
-    $page->assertPathIs('/')
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Ciao')
         ->assertSee('Hello')
-        ->assertSee('Hi');
+        ->assertSee('Hi'));
 
     $this->assertDatabaseHas('words', [
         'word' => 'Ciao',
@@ -102,18 +121,23 @@ it('allows creating a word with multiple translations', function () {
 });
 
 it('allows creating a word with translation help', function () {
-    $page = loginThroughBrowser()
-        ->click('Create New')
-        ->assertSee('Create New Word')
-        ->fill('word', 'Prego')
+    $page = loginThroughBrowser();
+
+    $page->click('Create New');
+
+    waitForBrowser(fn () => $page->assertSee('Create New Word'));
+
+    $page->fill('word', 'Prego')
         ->fill('#translation-temp-1', 'You are welcome')
         ->click('[title="Add translation help"]')
-        ->fill('input[placeholder="Enter help text..."]', 'Used as a polite reply')
-        ->click('Save');
+        ->fill('input[placeholder="Enter help text..."]', 'Used as a polite reply');
 
-    $page->assertPathIs('/')
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Prego')
-        ->assertSee('You are welcome');
+        ->assertSee('You are welcome'));
 
     $this->assertDatabaseHas('words', [
         'word' => 'Prego',
@@ -132,11 +156,15 @@ it('allows creating a word with tags', function () {
     $greeting = Tag::factory()->create(['tag' => 'Greeting']);
     $polite = Tag::factory()->create(['tag' => 'Polite']);
 
-    $page = loginThroughBrowser()
-        ->click('Create New')
+    $page = loginThroughBrowser();
+
+    $page->click('Create New');
+
+    waitForBrowser(fn () => $page
         ->assertSee('Create New Word')
-        ->assertSee('No tags yet')
-        ->fill('word', 'Ciao')
+        ->assertSee('No tags yet'));
+
+    $page->fill('word', 'Ciao')
         ->fill('#translation-temp-1', 'Hello')
         ->click('@open-tag-modal')
         ->assertSee('Select Tags')
@@ -146,14 +174,16 @@ it('allows creating a word with tags', function () {
         ->assertDontSee('Select Tags')
         ->assertSee('Greeting')
         ->assertSee('Polite')
-        ->assertDontSee('No tags yet')
-        ->click('Save');
+        ->assertDontSee('No tags yet');
 
-    $page->assertPathIs('/')
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Ciao')
         ->assertSee('Hello')
         ->assertSee('Greeting')
-        ->assertSee('Polite');
+        ->assertSee('Polite'));
 
     $word = Word::where('word', 'Ciao')->first();
 
@@ -164,11 +194,15 @@ it('allows creating a word with tags', function () {
 it('keeps tags unchanged when tag selection is cancelled', function () {
     $greeting = Tag::factory()->create(['tag' => 'Greeting']);
 
-    $page = loginThroughBrowser()
-        ->click('Create New')
+    $page = loginThroughBrowser();
+
+    $page->click('Create New');
+
+    waitForBrowser(fn () => $page
         ->assertSee('Create New Word')
-        ->assertSee('No tags yet')
-        ->click('@open-tag-modal')
+        ->assertSee('No tags yet'));
+
+    $page->click('@open-tag-modal')
         ->assertSee('Select Tags')
         ->check('#tag-'.$greeting->id)
         ->click('Cancel')

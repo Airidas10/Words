@@ -27,19 +27,24 @@ it('allows an authenticated user to edit a word', function () {
     $translationId = $word->translations->first()->id;
 
     $page = loginThroughBrowser()
-        ->assertSee('Edit')
-        ->click('Edit')
-        ->assertSee('Edit Word')
-        ->fill('word', 'Buongiorno')
-        ->fill('#translation-'.$translationId, 'Good morning')
-        ->fill('description', 'A morning greeting')
-        ->click('Save');
+        ->assertSee('Edit');
 
-    $page->assertPathIs('/')
+    $page->click('Edit');
+
+    waitForBrowser(fn () => $page->assertSee('Edit Word'));
+
+    $page->fill('word', 'Buongiorno')
+        ->fill('#translation-'.$translationId, 'Good morning')
+        ->fill('description', 'A morning greeting');
+
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Buongiorno')
         ->assertSee('Good morning')
         ->assertDontSee('Ciao')
-        ->assertDontSee('Hello');
+        ->assertDontSee('Hello'));
 
     $this->assertDatabaseHas('words', [
         'id' => $word->id,
@@ -59,19 +64,24 @@ it('rejects editing a word with empty required fields', function () {
     $translationId = $word->translations->first()->id;
 
     $page = loginThroughBrowser()
-        ->assertSee('Edit')
-        ->click('Edit')
-        ->assertSee('Edit Word')
-        ->fill('word', '')
-        ->fill('#translation-'.$translationId, '')
-        ->click('Save');
+        ->assertSee('Edit');
 
-    $page->assertPathIs('/words/edit/'.$word->id)
+    $page->click('Edit');
+
+    waitForBrowser(fn () => $page->assertSee('Edit Word'));
+
+    $page->fill('word', '')
+        ->fill('#translation-'.$translationId, '');
+
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/words/edit/'.$word->id)
         ->assertSee('Edit Word')
         ->assertSee('The word field is required.')
         ->assertVisible('@word-error')
         ->assertSee('The translation field is required.')
-        ->assertVisible('@translation-error-0');
+        ->assertVisible('@translation-error-0'));
 
     $this->assertDatabaseHas('words', [
         'id' => $word->id,
@@ -93,11 +103,13 @@ it('rejects editing a word into a duplicate', function () {
         ->assertSee('Ciao')
         ->navigate('/words/edit/'.$word->id)
         ->assertSee('Edit Word')
-        ->fill('word', 'Grazie')
-        ->click('Save');
+        ->fill('word', 'Grazie');
 
-    $page->assertPathIs('/words/edit/'.$word->id)
-        ->assertSee('Edit Word');
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/words/edit/'.$word->id)
+        ->assertSee('Edit Word'));
 
     $this->assertDatabaseHas('words', [
         'id' => $word->id,
@@ -112,17 +124,22 @@ it('allows editing a word to add multiple translations', function () {
     $translationId = $word->translations->first()->id;
 
     $page = loginThroughBrowser()
-        ->assertSee('Edit')
-        ->click('Edit')
-        ->assertSee('Edit Word')
-        ->click('Add more')
-        ->fill('#translation-temp-2', 'Hi')
-        ->click('Save');
+        ->assertSee('Edit');
 
-    $page->assertPathIs('/')
+    $page->click('Edit');
+
+    waitForBrowser(fn () => $page->assertSee('Edit Word'));
+
+    $page->click('Add more')
+        ->fill('#translation-temp-2', 'Hi');
+
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Ciao')
         ->assertSee('Hello')
-        ->assertSee('Hi');
+        ->assertSee('Hi'));
 
     $word->refresh();
 
@@ -140,16 +157,21 @@ it('allows editing a word to add translation help', function () {
     $word = createWordWithTranslationAndTag('Prego', 'You are welcome', 'Polite');
 
     $page = loginThroughBrowser()
-        ->assertSee('Edit')
-        ->click('Edit')
-        ->assertSee('Edit Word')
-        ->click('[title="Add translation help"]')
-        ->fill('input[placeholder="Enter help text..."]', 'Used as a polite reply')
-        ->click('Save');
+        ->assertSee('Edit');
 
-    $page->assertPathIs('/')
+    $page->click('Edit');
+
+    waitForBrowser(fn () => $page->assertSee('Edit Word'));
+
+    $page->click('[title="Add translation help"]')
+        ->fill('input[placeholder="Enter help text..."]', 'Used as a polite reply');
+
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Prego')
-        ->assertSee('You are welcome');
+        ->assertSee('You are welcome'));
 
     $this->assertDatabaseHas('translations', [
         'word_id' => $word->id,
@@ -165,11 +187,15 @@ it('allows editing a word to attach tags', function () {
     $polite = Tag::factory()->create(['tag' => 'Polite']);
 
     $page = loginThroughBrowser()
-        ->assertSee('Edit')
-        ->click('Edit')
+        ->assertSee('Edit');
+
+    $page->click('Edit');
+
+    waitForBrowser(fn () => $page
         ->assertSee('Edit Word')
-        ->assertSee('No tags yet')
-        ->click('@open-tag-modal')
+        ->assertSee('No tags yet'));
+
+    $page->click('@open-tag-modal')
         ->assertSee('Select Tags')
         ->check('#tag-'.$greeting->id)
         ->check('#tag-'.$polite->id)
@@ -177,13 +203,15 @@ it('allows editing a word to attach tags', function () {
         ->assertDontSee('Select Tags')
         ->assertSee('Greeting')
         ->assertSee('Polite')
-        ->assertDontSee('No tags yet')
-        ->click('Save');
+        ->assertDontSee('No tags yet');
 
-    $page->assertPathIs('/')
+    $page->click('Save');
+
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Ciao')
         ->assertSee('Greeting')
-        ->assertSee('Polite');
+        ->assertSee('Polite'));
 
     $word->refresh();
 

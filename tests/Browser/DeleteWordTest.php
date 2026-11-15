@@ -1,26 +1,33 @@
 <?php
 
 it('does not show delete on the create word page', function () {
-    $page = loginThroughBrowser()
-        ->click('Create New')
+    $page = loginThroughBrowser();
+
+    $page->click('Create New');
+
+    waitForBrowser(fn () => $page
         ->assertSee('Create New Word')
-        ->assertDontSee('Delete');
+        ->assertDontSee('Delete'));
 });
 
 it('keeps the word when delete confirmation is cancelled', function () {
     $word = createWordWithTranslationAndTag('Ciao', 'Hello', 'Greeting');
 
     $page = loginThroughBrowser()
-        ->assertSee('Edit')
-        ->click('Edit')
+        ->assertSee('Edit');
+
+    $page->click('Edit');
+
+    waitForBrowser(fn () => $page
         ->assertSee('Edit Word')
-        ->assertSee('Delete');
+        ->assertSee('Delete'));
 
     handleConfirmationDialog($page, accept: false);
     $page->click('Delete');
 
-    $page->assertPathIs('/words/edit/'.$word->id)
-        ->assertSee('Edit Word');
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/words/edit/'.$word->id)
+        ->assertSee('Edit Word'));
 
     $this->assertDatabaseHas('words', [
         'id' => $word->id,
@@ -33,17 +40,20 @@ it('allows deleting the only remaining word', function () {
     $translationId = $word->translations->first()->id;
 
     $page = loginThroughBrowser()
-        ->assertSee('Edit')
-        ->click('Edit')
-        ->assertSee('Edit Word');
+        ->assertSee('Edit');
+
+    $page->click('Edit');
+
+    waitForBrowser(fn () => $page->assertSee('Edit Word'));
 
     handleConfirmationDialog($page);
     $page->click('Delete');
 
-    $page->assertPathIs('/')
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Nothing to show here')
         ->assertDontSee('Ciao')
-        ->assertDontSee('Hello');
+        ->assertDontSee('Hello'));
 
     $this->assertDatabaseMissing('words', [
         'id' => $word->id,
@@ -68,12 +78,13 @@ it('allows deleting a word when other words remain', function () {
     handleConfirmationDialog($page);
     $page->click('Delete');
 
-    $page->assertPathIs('/')
+    waitForBrowser(fn () => $page
+        ->assertPathIs('/')
         ->assertSee('Grazie')
         ->assertSee('Thank you')
         ->assertDontSee('Ciao')
         ->assertDontSee('Hello')
-        ->assertDontSee('Nothing to show here');
+        ->assertDontSee('Nothing to show here'));
 
     $this->assertDatabaseMissing('words', [
         'id' => $wordToDelete->id,

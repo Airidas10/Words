@@ -28,8 +28,11 @@ it('lists tags with word counts for an authenticated user', function () {
     $unused = Tag::factory()->create(['tag' => 'Unused']);
 
     $page = loginThroughBrowser()
-        ->assertSee('Tags')
-        ->click('Tags')
+        ->assertSee('Tags');
+
+    $page->click('Tags');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/tags')
         ->assertSee('Tags')
         ->assertSee('Create New')
@@ -37,7 +40,7 @@ it('lists tags with word counts for an authenticated user', function () {
         ->assertSeeIn('@tag-name-'.$greeting->id, 'Greeting')
         ->assertSeeIn('@tag-word-count-'.$greeting->id, '1')
         ->assertSeeIn('@tag-name-'.$unused->id, 'Unused')
-        ->assertSeeIn('@tag-word-count-'.$unused->id, '0');
+        ->assertSeeIn('@tag-word-count-'.$unused->id, '0'));
 });
 
 it('shows a tag with its related words', function () {
@@ -74,9 +77,11 @@ it('shows a tag with its related words', function () {
         ->assertSee('Ciao')
         ->assertSee('Hello')
         ->assertSeeIn('@word-stats-'.$word->id, '50%')
-        ->assertSee('← Back to Tags')
-        ->click('← Back to Tags')
-        ->assertPathIs('/tags');
+        ->assertSee('← Back to Tags');
+
+    $page->click('← Back to Tags');
+
+    waitForBrowser(fn () => $page->assertPathIs('/tags'));
 });
 
 it('shows an empty state when a tag has no related words', function () {

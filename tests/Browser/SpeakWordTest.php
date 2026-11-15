@@ -70,11 +70,15 @@ it('cancels speech when clicking next on the random page', function () {
 
     $page->click('@speak-word');
 
-    expect($page->script('() => window.__cancelCalls'))->toBe(1);
+    $cancelsAfterSpeak = $page->script('() => window.__cancelCalls');
 
-    $page->click('Next')
+    expect($cancelsAfterSpeak)->toBe(1);
+
+    $page->click('Next');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/random')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 
-    expect($page->script('() => window.__cancelCalls'))->toBe(2);
+    expect($page->script('() => window.__cancelCalls'))->toBe($cancelsAfterSpeak + 1);
 });

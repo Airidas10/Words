@@ -12,11 +12,14 @@ it('shows a my struggles link on the homepage for logged-in users and opens the 
 
     $page = loginThroughBrowser($user);
 
-    $page->assertSee('My Struggles')
-        ->click('My Struggles')
+    $page->assertSee('My Struggles');
+
+    $page->click('My Struggles');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/my-struggles')
         ->assertSee('Ciao')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 });
 
 it('does not show a my struggles link on the homepage for guests', function () {
@@ -38,10 +41,13 @@ it('adds a word to struggles from a word card', function () {
 
     $page->assertSee('Ciao')
         ->assertPresent('@struggle-toggle-'.$word->id)
-        ->assertDataAttribute('@struggle-toggle-'.$word->id, 'in-struggles', 'false')
-        ->click('@struggle-toggle-'.$word->id)
+        ->assertDataAttribute('@struggle-toggle-'.$word->id, 'in-struggles', 'false');
+
+    $page->click('@struggle-toggle-'.$word->id);
+
+    waitForBrowser(fn () => $page
         ->assertDataAttribute('@struggle-toggle-'.$word->id, 'in-struggles', 'true')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 
     expect($user->fresh()->struggleWords->pluck('id')->all())->toContain($word->id);
 });
@@ -56,13 +62,18 @@ it('removes a word from struggles on the word show page', function () {
 
     $page = loginThroughBrowser($user);
 
-    $page->click('Ciao')
+    $page->click('Ciao');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/words/'.$word->id)
         ->assertPresent('@struggle-toggle-'.$word->id)
-        ->assertDataAttribute('@struggle-toggle-'.$word->id, 'in-struggles', 'true')
-        ->click('@struggle-toggle-'.$word->id)
+        ->assertDataAttribute('@struggle-toggle-'.$word->id, 'in-struggles', 'true'));
+
+    $page->click('@struggle-toggle-'.$word->id);
+
+    waitForBrowser(fn () => $page
         ->assertDataAttribute('@struggle-toggle-'.$word->id, 'in-struggles', 'false')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 
     expect($user->fresh()->struggleWords->pluck('id')->all())->not->toContain($word->id);
 });
@@ -77,12 +88,17 @@ it('removes a word from the my struggles page', function () {
 
     $page = loginThroughBrowser($user);
 
-    $page->click('My Struggles')
+    $page->click('My Struggles');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/my-struggles')
-        ->assertSee('Ciao')
-        ->click('@struggle-toggle-'.$word->id)
+        ->assertSee('Ciao'));
+
+    $page->click('@struggle-toggle-'.$word->id);
+
+    waitForBrowser(fn () => $page
         ->assertDontSee('Ciao')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 
     expect($user->fresh()->struggleWords->pluck('id')->all())->not->toContain($word->id);
 });
@@ -97,10 +113,13 @@ it('shows my struggles in the random pool dropdown for authenticated users', fun
 
     $page = loginThroughBrowser($user);
 
-    $page->click('Random')
+    $page->click('Random');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/random')
-        ->assertPresent('@random-pool-select')
-        ->click('@random-pool-select')
+        ->assertPresent('@random-pool-select'));
+
+    $page->click('@random-pool-select')
         ->assertPresent('@random-pool-panel')
         ->assertSee('Full Random')
         ->assertSee('My Struggles')
@@ -118,15 +137,20 @@ it('selects my struggles pool from the random picker', function () {
 
     $page = loginThroughBrowser($user);
 
-    $page->click('Random')
-        ->assertPathIs('/random')
-        ->click('@random-pool-select')
-        ->click('@random-pool-option-struggles')
+    $page->click('Random');
+
+    waitForBrowser(fn () => $page->assertPathIs('/random'));
+
+    $page->click('@random-pool-select');
+
+    $page->click('@random-pool-option-struggles');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/random')
         ->assertQueryStringHas('pool', 'struggles')
         ->assertSee('StruggleOnly')
         ->assertDontSee('NotStruggle')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 });
 
 it('does not show my struggles in the random pool dropdown for guests', function () {
@@ -156,19 +180,24 @@ it('loads struggle proposals only after the user triggers suggestions', function
 
     $page = loginThroughBrowser($user);
 
-    $page->click('My Struggles')
+    $page->click('My Struggles');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/my-struggles')
         ->assertSee('Listed')
         ->assertDontSee('WorstPropose')
         ->assertPresent('@struggle-proposals-trigger')
-        ->assertMissing('@struggle-proposals')
-        ->click('@struggle-proposals-trigger')
+        ->assertMissing('@struggle-proposals'));
+
+    $page->click('@struggle-proposals-trigger');
+
+    waitForBrowser(fn () => $page
         ->assertPresent('@struggle-proposals')
         ->assertSeeIn('@struggle-proposals', 'WorstPropose')
         ->assertPresent('@struggle-propose-toggle-'.$worst->id)
         ->assertDataAttribute('@struggle-propose-toggle-'.$worst->id, 'in-struggles', 'false')
         ->assertEnabled('@struggle-propose-toggle-'.$worst->id)
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 });
 
 it('adds a proposed word to struggles and leaves the proposal control unaddable', function () {
@@ -181,15 +210,21 @@ it('adds a proposed word to struggles and leaves the proposal control unaddable'
 
     $page = loginThroughBrowser($user);
 
-    $page->click('My Struggles')
-        ->assertPathIs('/my-struggles')
-        ->click('@struggle-proposals-trigger')
-        ->assertPresent('@struggle-propose-toggle-'.$worst->id)
-        ->click('@struggle-propose-toggle-'.$worst->id)
+    $page->click('My Struggles');
+
+    waitForBrowser(fn () => $page->assertPathIs('/my-struggles'));
+
+    $page->click('@struggle-proposals-trigger');
+
+    waitForBrowser(fn () => $page->assertPresent('@struggle-propose-toggle-'.$worst->id));
+
+    $page->click('@struggle-propose-toggle-'.$worst->id);
+
+    waitForBrowser(fn () => $page
         ->assertDataAttribute('@struggle-propose-toggle-'.$worst->id, 'in-struggles', 'true')
         ->assertDisabled('@struggle-propose-toggle-'.$worst->id)
         ->assertPresent('@struggle-toggle-'.$worst->id)
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 
     $this->assertDatabaseHas('user_word', [
         'user_id' => $user->id,
@@ -208,12 +243,17 @@ it('shows already-listed proposed words as unaddable', function () {
 
     $page = loginThroughBrowser($user);
 
-    $page->click('My Struggles')
+    $page->click('My Struggles');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/my-struggles')
-        ->assertSee('AlreadyListed')
-        ->click('@struggle-proposals-trigger')
+        ->assertSee('AlreadyListed'));
+
+    $page->click('@struggle-proposals-trigger');
+
+    waitForBrowser(fn () => $page
         ->assertPresent('@struggle-propose-toggle-'.$word->id)
         ->assertDataAttribute('@struggle-propose-toggle-'.$word->id, 'in-struggles', 'true')
         ->assertDisabled('@struggle-propose-toggle-'.$word->id)
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 });

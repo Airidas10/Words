@@ -8,13 +8,16 @@ it('logs in with valid credentials through the login form', function () {
         'password' => 'password',
     ]);
 
-    visit('/login')
+    $page = visit('/login')
         ->assertSee('Login')
         ->fill('#username', 'reallogin')
-        ->fill('#password', 'password')
-        ->click('@login-submit')
+        ->fill('#password', 'password');
+
+    $page->click('@login-submit');
+
+    waitForBrowser(fn () => $page
         ->assertPathIs('/')
         ->assertSee('Logout')
         ->assertDontSee('Login')
-        ->assertNoJavascriptErrors();
+        ->assertNoJavascriptErrors());
 });
