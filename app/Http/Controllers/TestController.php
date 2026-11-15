@@ -22,7 +22,7 @@ class TestController extends Controller
         $lastTest = $user->tests()->latest()->first();
         $questionsPerTest = config('words.questions_per_test');
 
-        // If no last test found, or last one is not from today and has a score, create new test...
+        // If no last test found, or the last one does not have a score, create a new test...
         if(!$lastTest || ($lastTest && $lastTest->score !== null)){
             if (Word::count() < $questionsPerTest) {
                 return Inertia::render('Error', [
